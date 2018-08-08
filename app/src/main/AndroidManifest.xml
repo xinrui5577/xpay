@@ -55,7 +55,7 @@
             android:name=".MainService"
             android:label="支付服务"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false"></service>
     </application>
 
 </manifest>

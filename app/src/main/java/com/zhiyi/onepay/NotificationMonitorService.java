@@ -81,6 +81,7 @@ public class NotificationMonitorService extends NotificationListenerService {
             Uri uri = new Uri.Builder().scheme("app").path("log").query("msg=测试成功").build();
             intent.setData(uri);
             sendBroadcast(intent);
+            Toast.makeText(this, "服务正常", Toast.LENGTH_SHORT).show();
             return;
         }
         String title = bundle.getString("android.title");

@@ -20,9 +20,11 @@ import android.util.Log;
 /**
  * 后台进程.确保进入后台也在运行
  */
-public class MainService extends Service implements Runnable{
+public class MainService extends Service implements Runnable, MediaPlayer.OnCompletionListener {
     private Handler handler;
     private IMessageHander msgHander;
+    private MediaPlayer payComp;
+    private PowerManager.WakeLock wakeLock;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -37,12 +39,15 @@ public class MainService extends Service implements Runnable{
         new Thread(this,"MainService").start();
         //保持黑屏状态执行
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MainService.class.getName());
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MainService.class.getName());
         if(wakeLock!=null){
             wakeLock.acquire();
         }else{
             Log.w("ZYKJ","wakeLock is null");
         }
+        //声音播放也不成功
+        payComp = MediaPlayer.create(this, R.raw.paycomp);
+        payComp.setOnCompletionListener(this);
 //        wakeLock.acquire();
     }
 
@@ -59,6 +64,11 @@ public class MainService extends Service implements Runnable{
 
     public void setMessageHander(IMessageHander hander){
         msgHander = hander;
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mediaPlayer) {
+
     }
 
     class MyBinder extends Binder{
@@ -82,7 +92,7 @@ public class MainService extends Service implements Runnable{
             payCompSounds();
         }
     }
-    private MediaPlayer payComp;
+
 
     /**
      * 支付通知发送成功的时候.播报声音.
@@ -90,9 +100,6 @@ public class MainService extends Service implements Runnable{
      * 但是这个播放声音我的手机老是出毛病.重启后就好了..
      */
     public void payCompSounds(){
-        if(payComp == null) {
-            payComp = MediaPlayer.create(this, R.raw.paycomp);
-        }
         payComp.start();
     }
 
@@ -102,6 +109,14 @@ public class MainService extends Service implements Runnable{
      */
     @Override
     public void onDestroy() {
+        if(payComp!=null){
+            payComp.release();
+            payComp= null;
+        }
+        if(wakeLock!=null){
+            wakeLock.release();
+            wakeLock = null;
+        }
         Intent localIntent = new Intent();
         localIntent.setClass(this, MainService.class);
         startService(localIntent);

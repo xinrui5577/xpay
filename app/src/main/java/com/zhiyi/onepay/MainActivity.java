@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 if(enableLog!=isChecked) {
                     enableLog = isChecked;
                     dbm.setConfig(AppConst.KeyBoolLog, enableLog ? TRUE : FALSE);
+                    sb.delete(0,sb.length());
                     logView.setText("");
                 }
             }
