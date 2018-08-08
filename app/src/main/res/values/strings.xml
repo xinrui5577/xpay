@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">UKAFU</string>
+    <string name="app_name2">个人支付专家</string>
+    <string name="action_help">帮助</string>
+    <!--<string name="title_activity_login">登录</string>-->
+
+    <!-- Strings related to login -->
+    <string name="action_sign_in">确认</string>
+    <string name="action_to_open">"支付服务"</string>
+    <string name="action_to_wx">微信</string>
+    <string name="action_to_zfb">支付宝</string>
+    <string name="action_to_log">显示日志</string>
+    <string name="action_to_privileges">服务权限</string>
+    <string name="action_open_setting">打开权限设置</string>
+    <string name="action_test">服务测试</string>
+    <string name="textOn">开启</string>
+    <string name="textOff">关闭</string>
+    <string name="app_id">appid</string>
+    <string name="app_token">token</string>
+    <string name="login_help">\n1:复制APPID,登录后台,选择个人支付,添加APPID,\n2:添加成功后可以获得token.将token填入上方.\n3:点击登录</string>
+</resources>
