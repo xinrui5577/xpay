@@ -6,9 +6,11 @@
 package com.zhiyi.onepay;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -21,7 +23,7 @@ import com.zhiyi.onepay.util.RequestUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotificationMonitorService extends NotificationListenerService {
+public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback{
     private static final String AliPay = "ALIPAY";
     private static final String WeixinPay = "WXPAY";
     //	private MyHandler handler;
@@ -29,15 +31,8 @@ public class NotificationMonitorService extends NotificationListenerService {
     private Pattern pAlipay;
     private Pattern pWeixin;
     private Handler callback;
+    private MediaPlayer payComp;
 
-    public String getInsideString(String paramString1, String paramString2, String paramString3) {
-        if (!paramString1.contains(paramString2))
-            return "";
-        if (!paramString1.contains(paramString3))
-            return "";
-        return paramString1.substring(paramString1.lastIndexOf(paramString2) + paramString2.length(),
-                paramString1.lastIndexOf(paramString3));
-    }
 
     public void onCreate() {
         super.onCreate();
@@ -47,21 +42,8 @@ public class NotificationMonitorService extends NotificationListenerService {
         String pattern = "(\\S*)通过扫码向你付款([\\d\\.]+)元";
         pAlipay = Pattern.compile(pattern);
         pWeixin = Pattern.compile("微信支付收款([\\d\\.]+)元");
-        callback = new Handler(
-                new Handler.Callback() {
-                    @Override
-                    public boolean handleMessage(Message message) {
-                        Log.i("ZYKJ",message.obj.toString());
-                        //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂
-                        Intent intent = new Intent();
-                        intent.setAction(AppConst.IntentAction);
-                        Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny="+message.obj.toString()).build();
-                        intent.setData(uri);
-                        sendBroadcast(intent);
-                        return false;
-                    }
-                }
-        );
+        callback = new Handler(this);
+        payComp = MediaPlayer.create(this, R.raw.paycomp);
     }
 
     public void onDestroy() {
@@ -81,7 +63,11 @@ public class NotificationMonitorService extends NotificationListenerService {
             Uri uri = new Uri.Builder().scheme("app").path("log").query("msg=测试成功").build();
             intent.setData(uri);
             sendBroadcast(intent);
-            Toast.makeText(this, "服务正常", Toast.LENGTH_SHORT).show();
+            Message msg = new Message();
+            msg.what = 1;
+            msg.obj = "服务正常";
+            callback.sendMessage(msg);
+            payComp.start();
             return;
         }
         String title = bundle.getString("android.title");
@@ -169,5 +155,24 @@ public class NotificationMonitorService extends NotificationListenerService {
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
         RequestUtils.getRequest(AppConst.HostUrl+"person/notify/log?type=" + payType + "&error=" + error, callback);
+    }
+
+    @Override
+    public boolean handleMessage(Message message) {
+        int what = message.what;
+        if(what == AppConst.MT_Net_Response){
+            Log.i("ZYKJ",message.obj.toString());
+            //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
+            Intent intent = new Intent();
+            intent.setAction(AppConst.IntentAction);
+            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny="+message.obj.toString()).build();
+            intent.setData(uri);
+            sendBroadcast(intent);
+            payComp.start();
+        }else if(what == AppConst.MT_Net_Toast){
+            Log.i("ZYKJ",message.obj.toString());
+            //Toast.makeText(this, message.obj.toString(), Toast.LENGTH_SHORT).show();
+        }
+        return true;
     }
 }

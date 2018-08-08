@@ -273,6 +273,12 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
     private void sendNotice(){
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"default");
         nb.setContentTitle("通知监控").setContentText("测试号通过扫码向你付款0.01元").setSmallIcon(R.mipmap.ic_launcher);

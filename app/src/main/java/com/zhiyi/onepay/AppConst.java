@@ -19,4 +19,7 @@ public class AppConst {
     public static String Secret="";
 
     public static final String IntentAction = "zhiyikeji";
+
+    public static final int MT_Net_Response = 1;
+    public static final int MT_Net_Toast = 1;
 }

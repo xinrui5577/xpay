@@ -89,7 +89,6 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
             msg.what = 1;
             msg.obj = "time";
             handler.sendMessage(msg);
-            payCompSounds();
         }
     }
 

@@ -11,6 +11,8 @@ import android.os.Message;
 import android.util.Log;
 
 
+import com.zhiyi.onepay.AppConst;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,7 +25,6 @@ import org.apache.http.util.EntityUtils;
 
 public class RequestUtils {
 
-    private static final int SHOW_RESPONSE=1;
 
 
     public static void getRequest(final String url,final Handler handler) {
@@ -49,7 +50,7 @@ public class RequestUtils {
                         //在子线程中将Message对象发出去
                         if(handler!=null) {
                             Message message = new Message();
-                            message.what = SHOW_RESPONSE;
+                            message.what = AppConst.MT_Net_Response;
                             message.obj = response.toString();
                             handler.sendMessage(message);
                         }
