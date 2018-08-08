@@ -1,3 +1,8 @@
+/**
+ *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ *  大连致一科技有限公司
+ * */
+
 package com.zhiyi.onepay;
 
 import android.app.Notification;
@@ -34,6 +39,7 @@ import com.zhiyi.onepay.util.DBManager;
 public class MainActivity extends AppCompatActivity {
     private final static String TRUE = "true";
     private final static String FALSE = "false";
+    private final static String LogTag = "ZYKJ";
 
     private Switch swt_fuwu;
     private Switch swt_service;
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private IMessageHander msgHander = new IMessageHander() {
         @Override
         public void handMessage(Message msg) {
-            Log.i("ZYKJ",msg.obj.toString());
+            Log.i(LogTag,msg.obj.toString());
             if(enableLog){
                 appendLog(msg.obj.toString());
             }
@@ -65,20 +71,21 @@ public class MainActivity extends AppCompatActivity {
             MainService.MyBinder myBinder = (MainService.MyBinder) binder;
             service = myBinder.getService();
             service.setMessageHander(msgHander);
-            Log.i("ZYKJ", "MainActive - onServiceConnected");
+            Log.i(LogTag, "MainActive - onServiceConnected");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.i("ZYKJ", "MainActive - onServiceDisconnected");
+            Log.i(LogTag, "MainActive - onServiceDisconnected");
         }
     };
 
+    //不知到什么原因.广播收不到
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Uri uri = intent.getData();
-            Log.i("ZYKJ","broadcast"+uri.toString());
+            Log.i(LogTag,"broadcast"+uri.toString());
             String path = uri.getPath();
             if("log".equals(path)){
                 appendLog(uri.toString());
@@ -287,6 +294,9 @@ public class MainActivity extends AppCompatActivity {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
 
+    /**
+     * 打开通知权限设置.一般手机根本找不到哪里设置
+     */
     private void openNotificationListenSettings()
     {
         try

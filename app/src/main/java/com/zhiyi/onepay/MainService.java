@@ -1,3 +1,9 @@
+/**
+ *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ *  大连致一科技有限公司
+ * */
+
+
 package com.zhiyi.onepay;
 
 import android.app.Service;
