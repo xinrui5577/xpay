@@ -1,3 +1,9 @@
+/**
+ *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ *  大连致一科技有限公司
+ * */
+
+
 package com.zhiyi.onepay.util;
 
 import android.content.Context;
@@ -13,18 +19,20 @@ public class AppUtil {
     public static String getUniqueId(Context context) {
         String androidID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         String id = androidID + Build.SERIAL;
-        try {
-            return toMD5(id);
-        } catch (NoSuchAlgorithmException e) {
-            Log.e("ZYKJ", "Md5Bug", e);
-            return id;
-        }
+        return toMD5(id);
     }
 
 
-    public static String toMD5(String text) throws NoSuchAlgorithmException {
+    public static String toMD5(String text){
         //获取摘要器 MessageDigest
-        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("ZYKJ", "Md5Bug", e);
+            return null;
+        }
+
         //通过摘要器对字符串的二进制字节数组进行hash计算
         byte[] digest = messageDigest.digest(text.getBytes());
 
@@ -45,5 +53,16 @@ public class AppUtil {
         return sb.toString();
     }
 
+
+    public static String randString(int len){
+        StringBuilder sb = new StringBuilder(len);
+        char[] seqs = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G','H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R','S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9'};
+        int total = seqs.length;
+        for (int i=0;i<len;i++){
+            int rnd = (int) (Math.random()*total);
+            sb.append(seqs[rnd]);
+        }
+        return  sb.toString();
+    }
 
 }

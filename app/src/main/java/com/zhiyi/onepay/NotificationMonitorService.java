@@ -15,6 +15,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.zhiyi.onepay.util.AppUtil;
 import com.zhiyi.onepay.util.RequestUtils;
 
 import java.util.regex.Matcher;
@@ -51,6 +52,12 @@ public class NotificationMonitorService extends NotificationListenerService {
                     @Override
                     public boolean handleMessage(Message message) {
                         Log.i("ZYKJ",message.obj.toString());
+                        //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂
+                        Intent intent = new Intent();
+                        intent.setAction(AppConst.IntentAction);
+                        Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny="+message.obj.toString()).build();
+                        intent.setData(uri);
+                        sendBroadcast(intent);
                         return false;
                     }
                 }
@@ -123,20 +130,43 @@ public class NotificationMonitorService extends NotificationListenerService {
         return START_STICKY;
     }
 
-    public void postMethod(String payType, String money, String username) {
+    /**
+     * 获取道的支付通知发送到服务器
+     * @param payType
+     * @param money
+     * @param username
+     */
+     public void postMethod(String payType, String money, String username) {
 //		Uri u = new Uri.Builder().path("pay").appendQueryParameter("type", payType)
 //				.appendQueryParameter("money", money).appendQueryParameter("uname", username).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
 //		String sec = "sec";
-        RequestUtils.getRequest("http://paynotify.ukafu.com/pay.php?type=" + payType + "&money=" + money + "&name=" + username, callback);
+
+
+         String appid = ""+AppConst.AppId;
+         String rndStr = AppUtil.randString(16);
+        String sign = AppUtil.toMD5(appid + AppConst.Secret + rndStr  +payType +money + username);
+        RequestUtils.getRequest(AppConst.HostUrl+"person/notify/pay?type=" + payType
+                + "&money=" + money
+                + "&uname=" + username
+                + "&appid=" +appid
+                + "&rndstr=" +rndStr
+                + "&sign=" +sign
+                , callback);
+
     }
 
+    /**
+     * 发送错误信息到服务器
+     * @param payType
+     * @param error
+     */
     public void postError(String payType, String error) {
 //		Uri u = new Uri.Builder().path("log")
 //				.appendQueryParameter("msg", error).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
-        RequestUtils.getRequest("http://paynotify.ukafu.com/log.php?type=" + payType + "&error=" + error, callback);
+        RequestUtils.getRequest(AppConst.HostUrl+"person/notify/log?type=" + payType + "&error=" + error, callback);
     }
 }

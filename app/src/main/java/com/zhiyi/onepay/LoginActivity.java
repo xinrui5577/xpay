@@ -119,6 +119,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(json.getInt("code")==0){
                             JSONObject data = json.getJSONObject("data");
                             String appId = data.getString("appid");
+                            AppConst.AppId = Integer.parseInt(appId);
                             mAppIdView.setText(appId);
                             dbManager.setConfig(AppConst.KeyAppId,appId);
                             helpView.setText(data.getString("help"));
@@ -133,16 +134,8 @@ public class LoginActivity extends AppCompatActivity {
                 }
             };
             Handler idHander = new Handler(callback);
-            String sign;
-            //http://faka.m18.com/persion/api/getAppId
-            try {
-                sign= AppUtil.toMD5("zhiyikeji"+appUnid);
-            } catch (NoSuchAlgorithmException e) {
-                Log.e("ZYKJ", "Md5Bug", e);
-                return;
-            }
-
-            RequestUtils.getRequest(AppConst.HostUrl+"persion/api/getAppId/unid/"+appUnid+"/sign/"+sign,idHander);
+            String sign= AppUtil.toMD5("zhiyikeji"+appUnid);
+            RequestUtils.getRequest(AppConst.HostUrl+"person/api/getAppId/unid/"+appUnid+"/sign/"+sign,idHander);
         }
     }
 
@@ -189,7 +182,7 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            RequestUtils.getRequest(AppConst.HostUrl+"persion/api/login/appid/"+appid+"/token/"+token,callback);
+            RequestUtils.getRequest(AppConst.HostUrl+"person/api/login/appid/"+appid+"/token/"+token,callback);
         }
     }
 

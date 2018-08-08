@@ -1,8 +1,14 @@
+/**
+ *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ *  大连致一科技有限公司
+ * */
+
 package com.zhiyi.onepay.util;
 
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 
 import org.apache.http.HttpEntity;
@@ -21,6 +27,7 @@ public class RequestUtils {
 
 
     public static void getRequest(final String url,final Handler handler) {
+        Log.i("ZYKJ","request url:"+url);
         new Thread(new Runnable() {
 
             @Override
@@ -40,10 +47,12 @@ public class RequestUtils {
                         String response = EntityUtils.toString(entity,"utf-8");//将entity当中的数据转换为字符串
 
                         //在子线程中将Message对象发出去
-                        Message message = new Message();
-                        message.what = SHOW_RESPONSE;
-                        message.obj = response.toString();
-                        handler.sendMessage(message);
+                        if(handler!=null) {
+                            Message message = new Message();
+                            message.what = SHOW_RESPONSE;
+                            message.obj = response.toString();
+                            handler.sendMessage(message);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
