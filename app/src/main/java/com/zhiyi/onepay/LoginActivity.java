@@ -153,11 +153,9 @@ public class LoginActivity extends AppCompatActivity {
     private void attemptLogin() {
 
         // Reset errors.
-        mAppIdView.setError(null);
         mTokenView.setError(null);
 
         // Store values at the time of the login attempt.
-        String appid = mAppIdView.getText().toString();
         String token = mTokenView.getText().toString();
         AppConst.Token = token;
         boolean cancel = false;
@@ -168,11 +166,7 @@ public class LoginActivity extends AppCompatActivity {
             focusView = mTokenView;
             cancel = true;
         }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(appid)) {
-            cancel = true;
-        }
+        String appid = ""+AppConst.AppId;
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first

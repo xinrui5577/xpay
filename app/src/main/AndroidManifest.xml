@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zhiyi.onepay">
+    package="com.zhiyi.onepay"
+    android:versionName="1.1">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -19,6 +20,10 @@
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -35,11 +40,11 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
+
         <service
             android:name=".NotificationMonitorService"
             android:label="支付通知"
@@ -50,9 +55,13 @@
         </service>
         <service
             android:name=".MainService"
-            android:label="支付服务"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false"
+            android:label="支付服务" />
+
+        <activity
+            android:name=".RegistActivity"
+            android:label="@string/title_activity_regist" />
     </application>
 
 </manifest>

@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.zhiyi.onepay.LoginActivity">
+    tools:context="com.zhiyi.onepay.RegistActivity">
 
     <!-- Login progress -->
     <ProgressBar
@@ -34,13 +34,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <EditText
-                    android:id="@+id/app_id"
+                <AutoCompleteTextView
+                    android:id="@+id/mobile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="true"
-                    android:hint="@string/app_id"
-                    android:inputType="textEmailAddress"
+                    android:hint="@string/prompt_mobile"
+                    android:inputType="textPhonetic"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -51,11 +50,12 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/token"
+                    android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/app_token"
+                    android:hint="@string/prompt_password"
                     android:imeActionId="6"
+                    android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
                     android:inputType="text"
                     android:maxLines="1"
@@ -64,7 +64,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/sign_in_button"
+                android:id="@+id/email_sign_in_button"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -72,20 +72,6 @@
                 android:text="@string/action_sign_in"
                 android:textStyle="bold" />
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/sign_in_help_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="280dp"
-                    android:hint="@string/login_help"
-                    android:inputType="textMultiLine"
-                    android:lines="10" />
-            </android.support.design.widget.TextInputLayout>
-
         </LinearLayout>
-
     </ScrollView>
 </LinearLayout>

@@ -7,6 +7,7 @@ package com.zhiyi.onepay;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -30,6 +31,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RemoteViews;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -184,6 +186,24 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("from", "MainActive");
         bindService(intent, conn, BIND_AUTO_CREATE);
         checkStatus();
+
+
+        Notification notification = new Notification();
+        //通知栏没有展开时的显示内容
+        notification.tickerText = "我的手机卫士时刻保护您";
+        //下拉通知栏的显示内容
+//        notification.contentView = new RemoteViews(getPackageName() , R.layout.notifition_view);
+
+        //点击通知栏跳转到相应的应用里面
+        Intent it = new Intent(this , MainActivity.class);
+        //这一句加不加没什么影响
+        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notification.contentIntent = PendingIntent.getActivity(this , 1 , intent , 0);
+
+        //这里的id不能是0
+//        startForeground(1 , notification);
+
+
     }
 
 

@@ -1,7 +1,7 @@
 /**
- *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
- *  大连致一科技有限公司
- * */
+ * 个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ * 大连致一科技有限公司
+ */
 
 package com.zhiyi.onepay;
 
@@ -23,7 +23,7 @@ import com.zhiyi.onepay.util.RequestUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback{
+public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback {
     private static final String AliPay = "ALIPAY";
     private static final String WeixinPay = "WXPAY";
     //	private MyHandler handler;
@@ -32,6 +32,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private Pattern pWeixin;
     private Handler callback;
     private MediaPlayer payComp;
+    private MediaPlayer payRecv;
 
 
     public void onCreate() {
@@ -44,6 +45,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         pWeixin = Pattern.compile("微信支付收款([\\d\\.]+)元");
         callback = new Handler(this);
         payComp = MediaPlayer.create(this, R.raw.paycomp);
+        payRecv = MediaPlayer.create(this, R.raw.payrecv);
     }
 
     public void onDestroy() {
@@ -55,7 +57,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     public void onNotificationPosted(StatusBarNotification sbn) {
         Bundle bundle = sbn.getNotification().extras;
         String pkgName = sbn.getPackageName();
-        if(getPackageName().equals(pkgName)){
+        if (getPackageName().equals(pkgName)) {
             //测试成功
             Log.i("ZYKJ", "测试成功");
             Intent intent = new Intent();
@@ -67,7 +69,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
             msg.what = 1;
             msg.obj = "服务正常";
             callback.sendMessage(msg);
-            payComp.start();
+            payRecv.start();
             return;
         }
         String title = bundle.getString("android.title");
@@ -76,7 +78,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         this.lastTimePosted = System.currentTimeMillis();
         //支付宝
         //com.eg.android.AlipayGphone]:支付宝通知 & 新哥通过扫码向你付款0.01元
-        if (pkgName.equals("com.eg.android.AlipayGphone")) {
+        if (pkgName.equals("com.eg.android.AlipayGphone") && text!=null) {
             // 现在创建 matcher 对象
             Matcher m = pAlipay.matcher(text);
             if (m.find()) {
@@ -89,7 +91,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         }
         //微信
         //com.tencent.mm]:微信支付 & 微信支付收款0.01元
-        else if (pkgName.equals("com.tencent.mm")) {
+        else if (pkgName.equals("com.tencent.mm") && text!=null) {
             // 现在创建 matcher 对象
             Matcher m = pWeixin.matcher(text);
             if (m.find()) {
@@ -101,7 +103,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
             }
         }
     }
-
 
 
     public void onNotificationRemoved(StatusBarNotification paramStatusBarNotification) {
@@ -123,23 +124,23 @@ public class NotificationMonitorService extends NotificationListenerService impl
      * @param money
      * @param username
      */
-     public void postMethod(String payType, String money, String username) {
+    public void postMethod(String payType, String money, String username) {
 //		Uri u = new Uri.Builder().path("pay").appendQueryParameter("type", payType)
 //				.appendQueryParameter("money", money).appendQueryParameter("uname", username).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
 //		String sec = "sec";
 
-
-         String appid = ""+AppConst.AppId;
-         String rndStr = AppUtil.randString(16);
-        String sign = AppUtil.toMD5(appid + AppConst.Secret + rndStr  +payType +money + username);
-        RequestUtils.getRequest(AppConst.HostUrl+"person/notify/pay?type=" + payType
-                + "&money=" + money
-                + "&uname=" + username
-                + "&appid=" +appid
-                + "&rndstr=" +rndStr
-                + "&sign=" +sign
+        payRecv.start();
+        String appid = "" + AppConst.AppId;
+        String rndStr = AppUtil.randString(16);
+        String sign = AppUtil.toMD5(appid + AppConst.Secret + rndStr + payType + money + username);
+        RequestUtils.getRequest(AppConst.HostUrl + "person/notify/pay?type=" + payType
+                        + "&money=" + money
+                        + "&uname=" + username
+                        + "&appid=" + appid
+                        + "&rndstr=" + rndStr
+                        + "&sign=" + sign
                 , callback);
 
     }
@@ -154,23 +155,23 @@ public class NotificationMonitorService extends NotificationListenerService impl
 //				.appendQueryParameter("msg", error).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
-        RequestUtils.getRequest(AppConst.HostUrl+"person/notify/log?type=" + payType + "&error=" + error, callback);
+        RequestUtils.getRequest(AppConst.HostUrl + "person/notify/log?type=" + payType + "&error=" + error, callback);
     }
 
     @Override
     public boolean handleMessage(Message message) {
         int what = message.what;
-        if(what == AppConst.MT_Net_Response){
-            Log.i("ZYKJ",message.obj.toString());
+        if (what == AppConst.MT_Net_Response) {
+            Log.i("ZYKJ", message.obj.toString());
             //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
             Intent intent = new Intent();
             intent.setAction(AppConst.IntentAction);
-            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny="+message.obj.toString()).build();
+            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny=" + message.obj.toString()).build();
             intent.setData(uri);
             sendBroadcast(intent);
             payComp.start();
-        }else if(what == AppConst.MT_Net_Toast){
-            Log.i("ZYKJ",message.obj.toString());
+        } else if (what == AppConst.MT_Net_Toast) {
+            Log.i("ZYKJ", message.obj.toString());
             //Toast.makeText(this, message.obj.toString(), Toast.LENGTH_SHORT).show();
         }
         return true;

@@ -6,6 +6,7 @@
 
 package com.zhiyi.onepay;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +16,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 /**
  * 后台进程.确保进入后台也在运行
@@ -48,7 +51,13 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
         //声音播放也不成功
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payComp.setOnCompletionListener(this);
-//        wakeLock.acquire();
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"default");
+        nb.setContentTitle("UKAFU个人支付").setTicker("UKAFU个人支付").setSmallIcon(R.mipmap.ic_launcher);
+        nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
+        nb.setWhen(System.currentTimeMillis());
+        Notification notification = nb.build();
+        startForeground(1,notification);
     }
 
     @Override
@@ -81,7 +90,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     public void run() {
         while(true){
             try {
-                Thread.sleep(10000);
+                Thread.sleep(600000);
             } catch (InterruptedException e) {
                 Log.e("ZYKJ","service thread",e);
             }

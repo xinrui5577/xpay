@@ -18,4 +18,15 @@
     <string name="app_id">appid</string>
     <string name="app_token">token</string>
     <string name="login_help">\n1:复制APPID,登录后台,选择个人支付,添加APPID,\n2:添加成功后可以获得token.将token填入上方.\n3:点击登录</string>
+    <string name="title_activity_regist">regist</string>
+
+    <!-- Strings related to register -->
+    <string name="prompt_mobile">手机号</string>
+    <string name="prompt_password">密码</string>
+    <string name="action_sign_in_short">注册</string>
+    <string name="error_invalid_mobile">手机号无效</string>
+    <string name="error_invalid_password">密码太短</string>
+    <string name="error_field_required">不能为空</string>
+
+
 </resources>
