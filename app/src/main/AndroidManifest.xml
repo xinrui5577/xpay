@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zhiyi.onepay"
-    android:versionName="1.1">
+    android:installLocation="internalOnly"
+    android:versionCode="13"
+    android:versionName="1.4">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -40,10 +42,20 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
+
+        <receiver
+            android:name=".BootRecevier"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".NotificationMonitorService"
@@ -62,6 +74,7 @@
         <activity
             android:name=".RegistActivity"
             android:label="@string/title_activity_regist" />
+        <activity android:name=".WebViewActivity"></activity>
     </application>
 
 </manifest>

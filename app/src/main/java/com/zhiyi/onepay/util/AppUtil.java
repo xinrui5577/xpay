@@ -7,6 +7,7 @@
 package com.zhiyi.onepay.util;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
@@ -64,5 +65,17 @@ public class AppUtil {
         }
         return  sb.toString();
     }
+
+    public static int getVersionCode(Context mContext) {
+        int versionCode = 0;
+        try {
+            versionCode = mContext.getPackageManager().
+                    getPackageInfo(mContext.getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
+
 
 }

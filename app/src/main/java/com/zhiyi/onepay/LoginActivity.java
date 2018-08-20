@@ -9,6 +9,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -74,6 +75,14 @@ public class LoginActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        Button getToken = findViewById(R.id.btn_getToken);
+        getToken.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                act_GetToken(v);
             }
         });
 
@@ -143,7 +152,12 @@ public class LoginActivity extends AppCompatActivity {
         return dbManager.getConfig(name);
     }
 
-
+    public void act_GetToken(View view) {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(AppConst.HostUrl+"person/index/getToken"));//Url 就是你要打开的网址
+        intent.setAction(Intent.ACTION_VIEW);
+        this.startActivity(intent); //启动浏览器
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.

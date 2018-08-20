@@ -9,10 +9,14 @@ public class AppConst {
     public static final String KeyToken = "token";
 //    public static final String KeySecret = "secret";
     public static final String KeyBoolLog = "b_set_log";
-    public static final String KeyBoolWx = "b_set_wx";
-    public static final String KeyBoolZfb = "b_set_zfb";
+//    public static final String KeyBoolWx = "b_set_wx";
+//    public static final String KeyBoolZfb = "b_set_zfb";
 
+    /**服务器地址*/
     public static final String HostUrl = "http://www.ukafu.com/";
+
+    /**传输数据为URL的KEY*/
+    public static final String ACTION_URL = "a_url";
 
     public static int AppId=0;
     public static String Token="";

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">UKAFU</string>
+    <string name="app_name">PXPAY</string>
     <string name="app_name2">个人支付专家</string>
     <string name="action_help">帮助</string>
     <!--<string name="title_activity_login">登录</string>-->
@@ -12,7 +12,9 @@
     <string name="action_to_log">显示日志</string>
     <string name="action_to_privileges">服务权限</string>
     <string name="action_open_setting">打开权限设置</string>
+    <string name="action_order">订单管理</string>
     <string name="action_test">服务测试</string>
+    <string name="action_get_token">获取Token</string>
     <string name="textOn">开启</string>
     <string name="textOff">关闭</string>
     <string name="app_id">appid</string>
@@ -28,5 +30,6 @@
     <string name="error_invalid_password">密码太短</string>
     <string name="error_field_required">不能为空</string>
 
+    <string name="notify_content">个人收款运行中</string>
 
 </resources>

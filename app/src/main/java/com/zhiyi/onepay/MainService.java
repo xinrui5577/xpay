@@ -54,7 +54,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"default");
         nb.setContentTitle("UKAFU个人支付").setTicker("UKAFU个人支付").setSmallIcon(R.mipmap.ic_launcher);
-        nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
+        //nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();
         startForeground(1,notification);

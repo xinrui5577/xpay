@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RemoteViews;
@@ -38,6 +40,8 @@ import android.widget.Toast;
 
 import com.zhiyi.onepay.util.DBManager;
 
+import org.apache.http.client.utils.URIBuilder;
+
 public class MainActivity extends AppCompatActivity {
     private final static String TRUE = "true";
     private final static String FALSE = "false";
@@ -46,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private Switch swt_fuwu;
     private Switch swt_service;
     private Switch swt_log;
-    private Switch swt_wx;
-    private Switch swt_zfb;
     private Button btn_test;
     private DBManager dbm;
     private TextView logView;
@@ -107,8 +109,7 @@ public class MainActivity extends AppCompatActivity {
         swt_fuwu = findViewById(R.id.p1);
         swt_service = findViewById(R.id.service);
         swt_log = findViewById(R.id.log);
-        swt_wx = findViewById(R.id.wx);
-        swt_zfb = findViewById(R.id.zfb);
+
         btn_test = findViewById(R.id.btn_test);
         logView = findViewById(R.id.text_log);
         swt_service.setChecked(false);
@@ -120,13 +121,7 @@ public class MainActivity extends AppCompatActivity {
         enableLog = TRUE.equals(log);
         swt_log.setChecked(enableLog);
 
-        String wx = dbm.getConfig(AppConst.KeyBoolWx);
-        enableWx = TRUE.equals(wx);
-        swt_wx.setChecked(enableWx);
 
-        String zfb = dbm.getConfig(AppConst.KeyBoolZfb);
-        enableZfb = TRUE.equals(zfb);
-        swt_zfb.setChecked(enableZfb);
         IntentFilter filter = new IntentFilter(AppConst.IntentAction);
         registerReceiver(receiver,filter);
 
@@ -158,51 +153,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        swt_wx.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(enableWx!=isChecked) {
-                    enableWx = isChecked;
-                    dbm.setConfig(AppConst.KeyBoolWx, enableWx ? TRUE : FALSE);
-                }
-            }
-        });
-        swt_zfb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(enableZfb!=isChecked) {
-                    enableZfb = isChecked;
-                    dbm.setConfig(AppConst.KeyBoolZfb, enableZfb ? TRUE : FALSE);
-                }
-            }
-        });
+
         btn_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendNotice();
             }
         });
+        Button btn_order = findViewById(R.id.btn_order);
+        btn_order.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                intent.putExtra(AppConst.ACTION_URL,AppConst.HostUrl+"app/start/index.html#/token="+AppConst.Token+"/appid="+AppConst.AppId);
+                startActivity(intent);
+            }
+        });
         Intent intent = new Intent(this, MainService.class);
         intent.putExtra("from", "MainActive");
         bindService(intent, conn, BIND_AUTO_CREATE);
         checkStatus();
-
-
-        Notification notification = new Notification();
-        //通知栏没有展开时的显示内容
-        notification.tickerText = "我的手机卫士时刻保护您";
-        //下拉通知栏的显示内容
-//        notification.contentView = new RemoteViews(getPackageName() , R.layout.notifition_view);
-
-        //点击通知栏跳转到相应的应用里面
-        Intent it = new Intent(this , MainActivity.class);
-        //这一句加不加没什么影响
-        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        notification.contentIntent = PendingIntent.getActivity(this , 1 , intent , 0);
-
-        //这里的id不能是0
-//        startForeground(1 , notification);
-
 
     }
 
@@ -222,8 +192,6 @@ public class MainActivity extends AppCompatActivity {
         if(!enabled){
             swt_service.setEnabled(false);
             swt_log.setEnabled(false);
-            swt_wx.setEnabled(false);
-            swt_zfb.setEnabled(false);
             appendLog("权限未开启");
             return;
         }
@@ -242,8 +210,7 @@ public class MainActivity extends AppCompatActivity {
         toggleNotificationListenerService();
         swt_service.setChecked(true);
         //微信支付宝开启
-        swt_wx.setEnabled(true);
-        swt_zfb.setEnabled(true);
+
     }
     private StringBuilder sb;
     private void appendLog(String log){
@@ -320,23 +287,20 @@ public class MainActivity extends AppCompatActivity {
         localPackageManager.setComponentEnabledSetting(new ComponentName(this, NotificationMonitorService.class),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
+//
+//    private void openPowerSetting(){
+//        Intent powerUsageIntent = new Intent(Settings.ACTION_APPLICATION_SETTINGS);
+//        ResolveInfo resolveInfo = getPackageManager().resolveActivity(powerUsageIntent, 0);
+//        if(resolveInfo != null){
+//            startActivity(powerUsageIntent);
+//        }
+//    }
 
     /**
      * 打开通知权限设置.一般手机根本找不到哪里设置
      */
     private void openNotificationListenSettings()
     {
-        try
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                Intent localIntent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-                startActivity(localIntent);
-            }
-        }
-        catch (Exception localException)
-        {
-            localException.printStackTrace();
-        }
 
         try {
             Intent intent;
