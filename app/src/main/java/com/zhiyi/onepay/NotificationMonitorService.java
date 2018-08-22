@@ -78,10 +78,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
             Uri uri = new Uri.Builder().scheme("app").path("log").query("msg=测试成功").build();
             intent.setData(uri);
             sendBroadcast(intent);
-            Message msg = new Message();
-            msg.what = 1;
-            msg.obj = "服务正常";
-            callback.sendMessage(msg);
             payRecv.start();
             return;
         }

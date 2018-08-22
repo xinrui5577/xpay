@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@android:style/Theme.NoTitleBar"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
     tools:context="com.zhiyi.onepay.WebViewActivity">
 
     <WebView
