@@ -7,7 +7,6 @@ package com.zhiyi.onepay;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,7 +15,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -30,17 +28,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.RemoteViews;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhiyi.onepay.util.DBManager;
-
-import org.apache.http.client.utils.URIBuilder;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TRUE = "true";
@@ -50,12 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private Switch swt_fuwu;
     private Switch swt_service;
     private Switch swt_log;
-    private Button btn_test;
+    private Button btn_qrcode;
     private DBManager dbm;
     private TextView logView;
 
-    private boolean enableWx;
-    private boolean enableZfb;
     private boolean enableLog;
     private Handler handler;
 
@@ -110,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         swt_service = findViewById(R.id.service);
         swt_log = findViewById(R.id.log);
 
-        btn_test = findViewById(R.id.btn_test);
+        btn_qrcode = findViewById(R.id.btn_qrcode);
         logView = findViewById(R.id.text_log);
         swt_service.setChecked(false);
         handler = new Handler();
@@ -154,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btn_test.setOnClickListener(new View.OnClickListener() {
+        btn_qrcode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendNotice();
+                openQrcode();
             }
         });
         Button btn_order = findViewById(R.id.btn_order);
@@ -173,16 +165,14 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("from", "MainActive");
         bindService(intent, conn, BIND_AUTO_CREATE);
         checkStatus();
-
     }
-
-
 
     @Override
     protected void onResume() {
         super.onResume();
         checkStatus();
     }
+
     private boolean enabedPrivileges;
     private void checkStatus(){
         //权限开启.才能启动服务
@@ -209,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggleNotificationListenerService();
         swt_service.setChecked(true);
+        sendNotice();
         //微信支付宝开启
 
     }
@@ -264,6 +255,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+    }
+
+    private void openQrcode(){
+        Intent intent = new Intent(MainActivity.this, QrcodeActivity.class);
+        startActivity(intent);
     }
 
     private void sendNotice(){

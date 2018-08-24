@@ -23,7 +23,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -74,7 +73,14 @@
         <activity
             android:name=".RegistActivity"
             android:label="@string/title_activity_regist" />
-        <activity android:name=".WebViewActivity"></activity>
+        <activity android:name=".WebViewActivity"
+            android:theme="@style/FullscreenTheme"
+            />
+        <activity
+            android:name=".QrcodeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_qrcode"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

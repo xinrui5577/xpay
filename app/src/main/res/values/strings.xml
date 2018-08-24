@@ -13,7 +13,7 @@
     <string name="action_to_privileges">服务权限</string>
     <string name="action_open_setting">打开权限设置</string>
     <string name="action_order">订单管理</string>
-    <string name="action_test">服务测试</string>
+    <string name="action_test">二维码管理</string>
     <string name="action_get_token">获取Token</string>
     <string name="textOn">开启</string>
     <string name="textOff">关闭</string>
@@ -31,5 +31,9 @@
     <string name="error_field_required">不能为空</string>
 
     <string name="notify_content">个人收款运行中</string>
+
+    <string name="title_activity_qrcode">二维码管理</string>
+    <string name="dummy_button">添加二维码</string>
+    <string name="dummy_content">没有可用二维码\n请添加二维码</string>
 
 </resources>
