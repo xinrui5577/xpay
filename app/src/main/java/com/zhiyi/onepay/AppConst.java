@@ -26,4 +26,8 @@ public class AppConst {
 
     public static final int MT_Net_Response = 1;
     public static final int MT_Net_Toast = 1;
+
+    public static final String authUrl(String api){
+        return HostUrl+api+"?appid="+AppId+"&token="+Token;
+    }
 }

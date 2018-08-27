@@ -28,6 +28,9 @@ public class RequestUtils {
 
 
     public static void getRequest(final String url,final Handler handler) {
+        getRequest(url,handler,0);
+    }
+    public static void getRequest(final String url,final Handler handler,final int arg) {
         Log.i("ZYKJ","request url:"+url);
         new Thread(new Runnable() {
 
@@ -51,6 +54,7 @@ public class RequestUtils {
                         if(handler!=null) {
                             Message message = new Message();
                             message.what = AppConst.MT_Net_Response;
+                            message.arg1 = arg;
                             message.obj = response.toString();
                             handler.sendMessage(message);
                         }

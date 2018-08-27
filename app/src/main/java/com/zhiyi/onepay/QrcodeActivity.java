@@ -1,24 +1,24 @@
 package com.zhiyi.onepay;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.webkit.JavascriptInterface;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
@@ -26,12 +26,14 @@ import com.google.zxing.decode.BitmapDecoder;
 import com.qcloud.image.ImageClient;
 import com.qcloud.image.request.GeneralOcrRequest;
 import com.zhiyi.onepay.data.QrCodeData;
+import com.zhiyi.onepay.util.RequestUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,165 +41,57 @@ import java.util.regex.Pattern;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class QrcodeActivity extends AppCompatActivity {
+public class QrcodeActivity extends AppCompatActivity implements Handler.Callback {
+
+    public final int ARG_TYPE_QRCODELIST = 1;
+    public final int ARG_TYPE_ADD = 2;
+    public final int ARG_TYPE_DEL = 3;
+
 
     private final int PICK_CODE = 2;
 
     private static String LOG_TAG = "ZYKJ";
 
-
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
     private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
+    private LinearLayout container;
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
+    private Handler handler;
+
+    private View.OnClickListener readClick = new View.OnClickListener(){
         @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
+        public void onClick(View view) {
             readImg();
-            return false;
         }
     };
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_qrcode);
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        container = findViewById(R.id.container);
         mContentView = findViewById(R.id.fullscreen_content);
 
-
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
+        mContentView.setOnClickListener(readClick);
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        handler = new Handler(getMainLooper(), this);
+
+        findViewById(R.id.dummy_button).setOnClickListener(readClick);
+
+        RequestUtils.getRequest(AppConst.authUrl("person/qrcode/index"), handler, ARG_TYPE_QRCODELIST);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in delay milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
-    }
 
     public void readImg() {
-        Intent pic = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(pic, PICK_CODE);
+//        Intent pic = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult(pic, PICK_CODE);
+
+        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        intent.putExtra("scale", true);//设置可以缩放
+        intent.putExtra("crop", true);//设置可以裁剪
+        intent.setType("image/*");//设置需要从系统选择的内容：图片
+        //intent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);//设置输出位置
+        startActivityForResult(intent, PICK_CODE);
     }
 
     @Override
@@ -225,17 +119,7 @@ public class QrcodeActivity extends AppCompatActivity {
                     String txt = rs.getText();
                     Log.w(LOG_TAG, txt);
                     if (txt != null) {
-                        int type;
-                        if (txt.toUpperCase().startsWith("WXP://")) {
-                            type = QrCodeData.TYPE_WX;
-                        } else if (txt.toUpperCase().startsWith("HTTPS://QR.ALIPAY.COM")) {
-                            type = QrCodeData.TYPE_ALI;
-                        } else {
-                            Log.w(LOG_TAG, "qrcode is not enable");
-                            Toast.makeText(this, "不支持选择的二维码,请选择支付宝/微信收款码", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        readTxt(currentPhotoString, type);
+                        readTxt(currentPhotoString, txt);
 
                     }
                 }
@@ -247,7 +131,7 @@ public class QrcodeActivity extends AppCompatActivity {
     /**
      * 压缩图片
      */
-    private Bitmap resizePhono(String currentPhotoString ) {
+    private Bitmap resizePhono(String currentPhotoString) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;//仅仅加载图片
         BitmapFactory.decodeFile(currentPhotoString, options);
@@ -279,7 +163,17 @@ public class QrcodeActivity extends AppCompatActivity {
 
     private ImageClient imageClient;
 
-    private void readTxt(final String file, final int type) {
+    private void readTxt(final String file,final String url) {
+        final int type;
+        if (url.toUpperCase().startsWith("WXP://")) {
+            type = QrCodeData.TYPE_WX;
+        } else if (url.toUpperCase().startsWith("HTTPS://QR.ALIPAY.COM")) {
+            type = QrCodeData.TYPE_ALI;
+        } else {
+            Log.w(LOG_TAG, "qrcode is not enable");
+            Toast.makeText(this, "不支持选择的二维码,请选择支付宝/微信收款码", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // Android 4.0 之后不能在主线程中请求HTTP请求
         new Thread(new Runnable() {
             @Override
@@ -306,6 +200,7 @@ public class QrcodeActivity extends AppCompatActivity {
 
 
                 QrCodeData qrData = new QrCodeData();
+                qrData.money = "0";
                 try {
                     JSONObject jsonObject = new JSONObject(ret);
                     int code = jsonObject.getInt("code");
@@ -337,7 +232,7 @@ public class QrcodeActivity extends AppCompatActivity {
                                 }
                                 m = pWeixinNick.matcher(value);
                                 if (m.find()) {
-                                    qrData.userName = m.group(1);
+                                    qrData.name = m.group(1);
                                     continue;
                                 }
                             }
@@ -357,17 +252,140 @@ public class QrcodeActivity extends AppCompatActivity {
                                 if (m.find()) {
                                     continue;
                                 } else {
-                                    qrData.userName = value;
+                                    qrData.name = value;
                                 }
                             }
                         }
+                    }
+                    if(!qrData.name.matches("^\\S+$")){
+                        qrData.name = "";
                     }
                     qrData.type = type;
                 } catch (JSONException e) {
                     Log.w(LOG_TAG, e);
                 }
-                Log.i(LOG_TAG,qrData.money+qrData.userName);
+
+                Log.i(LOG_TAG, qrData.money + qrData.name);
+                RequestUtils.getRequest(AppConst.authUrl("person/qrcode/upload")+"&money="+qrData.money+"&name="+qrData.name+"&code="+url,handler,ARG_TYPE_ADD);
             }
         }).start();
+    }
+
+    private HashMap<String,View> codeMap = new HashMap<>();
+    @Override
+    public boolean handleMessage(Message msg) {
+        if (msg.what == AppConst.MT_Net_Response) {
+            if (msg.arg1 == ARG_TYPE_QRCODELIST) {
+                try {
+                    JSONObject obj = new JSONObject(msg.obj.toString());
+                    if (obj.getInt("code") == 0) {
+                        JSONArray list = obj.getJSONArray("data");
+                        int[] colors = new int[]{R.color.colorPrimary,R.color.colorPrimaryDark};
+                        if (list != null && list.length() > 0) {
+                            int flag = 0;
+                            for (int i = 0; i < list.length(); i++) {
+                                View view = addViewItem(list.getJSONObject(i));
+                                if(view!=null){
+                                    view.setBackgroundColor(getResources().getColor(colors[++flag%2],getTheme()));
+                                }
+                            }
+                        }
+
+                    } else {
+                        Toast.makeText(this, obj.getString("msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else if(msg.arg1 == ARG_TYPE_ADD){
+                try {
+                    JSONObject obj = new JSONObject(msg.obj.toString());
+                    if (obj.getInt("code") == 0) {
+                        JSONObject data = obj.getJSONObject("data");
+                        updateView(data);
+                    } else {
+                        Toast.makeText(this, obj.getString("msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(codeMap.size()>0){
+                mContentView.setVisibility(View.VISIBLE);
+            }
+        }
+        return false;
+    }
+
+    private View addViewItem(JSONObject data) {
+
+        try {
+            if(!data.has("money_round")){
+                return null;
+            }
+            Object o = data.get("money_round");
+            String money = ""+o;
+            if(codeMap.containsKey(money)){
+                updateView(data);
+                return null;
+            }
+            View view = View.inflate(this, R.layout.qrcode, null);
+
+            TextView btn_add = view.findViewById(R.id.qr_money);
+            btn_add.setText(money);
+            updateText(data,view);
+            codeMap.put(money,view);
+            container.addView(view);
+            return view;
+        } catch (JSONException e) {
+            Log.e(LOG_TAG,"获取money_round失败"+data.toString());
+            Log.w(LOG_TAG,e);
+            return null;
+        }
+
+    }
+
+    public void updateView(JSONObject data){
+        try {
+            if(!data.has("money_round")){
+                return;
+            }
+            Object o = data.get("money_round");
+            String key = ""+o;
+            if(data.has("add")) {
+                int add = data.getInt("add");
+                if (add == 0) {
+                    return;
+                }
+            }
+            if(codeMap.containsKey(key)){
+                View view = codeMap.get(key);
+                updateText(data,view);
+            }else{
+                addViewItem(data);
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG,"获取money_round失败"+data.toString());
+            Log.w(LOG_TAG,e);
+        }
+    }
+
+    private void updateText(JSONObject data,View view) throws JSONException {
+        String type = data.getString("pay_type");
+        TextView textView = null;
+        if(QrCodeData.NAME_ALI.equals(type)){
+             textView = view.findViewById(R.id.qr_zfb_num);
+
+        }else if(QrCodeData.NAME_WX.equals(type)) {
+            textView = view.findViewById(R.id.qr_wx_num);
+        }
+        int num=0;
+        if(data.has("count")){
+            num = data.getInt("count");
+        }else{
+            String numStr = textView.getText().toString();
+            num = Integer.parseInt(numStr)+1;
+        }
+        textView.setText(num+"");
     }
 }

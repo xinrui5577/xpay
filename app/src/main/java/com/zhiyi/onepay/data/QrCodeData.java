@@ -11,6 +11,5 @@ public class QrCodeData {
     public static final String NAME_ALI = "ALIPAY";
     public int type;
     public String name;
-    public String userName;
     public String money;
 }
