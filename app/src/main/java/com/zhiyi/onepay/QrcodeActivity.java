@@ -99,7 +99,15 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
         if (requestCode == PICK_CODE) {
             if (intent != null) {
                 Uri uri = intent.getData();
+                if(uri == null){
+                    Toast.makeText(this,"目标数据为空",Toast.LENGTH_LONG);
+                    return;
+                }
                 Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if(cursor == null){
+                    Toast.makeText(this,"找不到数据",Toast.LENGTH_LONG);
+                    return;
+                }
                 cursor.moveToFirst();
                 int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
                 String currentPhotoString = cursor.getString(idx);
