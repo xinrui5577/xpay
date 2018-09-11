@@ -110,6 +110,10 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
                 }
                 cursor.moveToFirst();
                 int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                if(idx<0){
+                    Toast.makeText(this,"无法访问相册",Toast.LENGTH_LONG);
+                    return;
+                }
                 String currentPhotoString = cursor.getString(idx);
                 cursor.close();
                 Bitmap bitmap = resizePhono(currentPhotoString);

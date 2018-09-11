@@ -6,9 +6,12 @@
 package com.zhiyi.onepay;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,6 +42,8 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private MediaPlayer payComp;
     private MediaPlayer payRecv;
 
+    public static final  String CHANNEL_ID          = "zhi_yi_px_pay";
+//    NotificationChannel mNotificationChannel;
 
     public void onCreate() {
         super.onCreate();
@@ -51,14 +56,24 @@ public class NotificationMonitorService extends NotificationListenerService impl
         callback = new Handler(this);
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payRecv = MediaPlayer.create(this, R.raw.payrecv);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel mNotificationChannel = new NotificationChannel(CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationChannel.setDescription("个人支付的监控");
+            getNotificationManager().createNotificationChannel(mNotificationChannel);
+        }
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this, CHANNEL_ID);
 
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this, "default");
         nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.mipmap.ic_launcher);
         nb.setContentText("个人支付运行中.请保持此通知一直存在");
         //nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();
         startForeground(1, notification);
+    }
+
+    private NotificationManager getNotificationManager()
+    {
+        return (NotificationManager) this.getSystemService(this.NOTIFICATION_SERVICE);
     }
 
     public void onDestroy() {
