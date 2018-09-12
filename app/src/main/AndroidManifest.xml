@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zhiyi.onepay"
-    android:installLocation="internalOnly"
-    >
+    android:installLocation="internalOnly">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -73,14 +72,15 @@
         <activity
             android:name=".RegistActivity"
             android:label="@string/title_activity_regist" />
-        <activity android:name=".WebViewActivity"
-            android:theme="@style/FullscreenTheme"
-            />
+        <activity
+            android:name=".WebViewActivity"
+            android:theme="@style/FullscreenTheme" />
         <activity
             android:name=".QrcodeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_qrcode"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme" />
+        <activity android:name=".MerchantActivity"></activity>
     </application>
 
 </manifest>

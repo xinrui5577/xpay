@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private Switch swt_service;
     private Switch swt_log;
     private Button btn_qrcode;
+    private Button btn_merchant;
     private DBManager dbm;
     private TextView logView;
 
@@ -103,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         swt_log = findViewById(R.id.log);
 
         btn_qrcode = findViewById(R.id.btn_qrcode);
+        btn_merchant = findViewById(R.id.btn_merchant);
+
         logView = findViewById(R.id.text_log);
         swt_service.setChecked(false);
         handler = new Handler();
@@ -152,6 +155,17 @@ public class MainActivity extends AppCompatActivity {
                 openQrcode();
             }
         });
+
+        btn_merchant.setOnClickListener(
+                new View.OnClickListener(){
+                     @Override
+                     public void onClick(View v) {
+                         Intent intent = new Intent(MainActivity.this, MerchantActivity.class);
+                         startActivity(intent);
+                     }
+                 }
+        );
+
         Button btn_order = findViewById(R.id.btn_order);
         btn_order.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -256,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
     }
+
 
     private void openQrcode(){
         Intent intent = new Intent(MainActivity.this, QrcodeActivity.class);

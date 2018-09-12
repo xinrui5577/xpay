@@ -66,25 +66,41 @@
                     android:layout_marginTop="16dp"
                     android:layout_weight="1"
                     android:background="@android:color/holo_green_dark"
-                    android:text="@string/action_test"
+                    android:text="@string/action_qrcode"
                     android:textStyle="bold" />
-
                 <Button
-                    android:id="@+id/btn_order"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:background="@color/colorPrimaryDark"
+                    android:id="@+id/btn_merchant"
+                    style="@style/Widget.AppCompat.Button.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:layout_weight="1"
-                    android:text="@string/action_order"
+                    android:background="@android:color/holo_orange_dark"
+                    android:text="@string/action_merchant"
                     android:textStyle="bold" />
             </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_order"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:background="@color/colorPrimaryDark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:text="@string/action_order"
+                android:textStyle="bold" />
+        </LinearLayout>
+
             <TextView
                 android:id="@+id/text_log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/action_test"
+                android:text="@string/action_qrcode"
                  />
         </LinearLayout>
 

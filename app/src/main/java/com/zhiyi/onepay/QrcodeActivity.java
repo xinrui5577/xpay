@@ -213,6 +213,7 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
 
                 QrCodeData qrData = new QrCodeData();
                 qrData.money = "0";
+                qrData.name="";
                 try {
                     JSONObject jsonObject = new JSONObject(ret);
                     int code = jsonObject.getInt("code");

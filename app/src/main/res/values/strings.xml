@@ -13,7 +13,8 @@
     <string name="action_to_privileges">服务权限</string>
     <string name="action_open_setting">打开权限设置</string>
     <string name="action_order">订单管理</string>
-    <string name="action_test">二维码管理</string>
+    <string name="action_qrcode">二维码管理</string>
+    <string name="action_merchant">商户密钥</string>
     <string name="action_get_token">获取Token</string>
     <string name="textOn">开启</string>
     <string name="textOff">关闭</string>
@@ -35,5 +36,7 @@
     <string name="title_activity_qrcode">二维码管理</string>
     <string name="dummy_button">添加二维码</string>
     <string name="dummy_content">没有可用二维码\n请添加二维码</string>
+    <string name="title_activity_merchant">商户密钥</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
