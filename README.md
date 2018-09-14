@@ -23,7 +23,7 @@
 	不怕一万就怕万一.如果哪个订单收到钱而未触发订单完成.那么就需要手动完成一下订单咯.(比如关机,断网,都有可能导致)
 	订单管理,列出了自己的所有订单.看看有没有失败的订单(收到钱,没发货).手动点一下完成即可
 	
-## 下单:
+# 下单:
 	<a href="https://gitee.com/sipengcode/quick-pay" targe="_blank"> 下单演示,接入文档, PHP Demo </a>
 	支付页面,手机,PC自适应
 	<img src="https://images.gitee.com/uploads/images/2018/0914/141509_bf37f6ae_2525.jpeg" alt="个人支付PC页面" width="50%" hegiht="300" align=left /> 
