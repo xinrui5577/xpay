@@ -1,3 +1,4 @@
+<img src="https://images.gitee.com/uploads/images/2018/0914/141509_bf37f6ae_2525.jpeg" alt="个人支付PC页面" width="50%" hegiht="300" align=left /> 
 # 微信支付宝个人收款
  这个是客户端.安卓APP监控收款通知
  还有一个xposed的端,原理百度一下,<a href="https://gitee.com/xinyu126/xp-pay" target="_blank">查看xposed的版本</a>
@@ -26,4 +27,4 @@
 # 下单
  <a href="https://gitee.com/sipengcode/quick-pay" targe="_blank"> 下单演示,接入文档, PHP Demo </a>
 	支付页面,手机,PC自适应
-	<img src="https://images.gitee.com/uploads/images/2018/0914/141509_bf37f6ae_2525.jpeg" alt="个人支付PC页面" width="50%" hegiht="300" align=left /> 
+	
