@@ -7,7 +7,7 @@ package com.zhiyi.onepay;
 public class AppConst {
     public static final String KeyAppId = "appid";
     public static final String KeyToken = "token";
-//    public static final String KeySecret = "secret";
+    public static final String KeySecret = "secret";
     public static final String KeyBoolLog = "b_set_log";
 //    public static final String KeyBoolWx = "b_set_wx";
 //    public static final String KeyBoolZfb = "b_set_zfb";

@@ -205,6 +205,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(json.getInt("code")==0){
                             AppConst.Secret = json.getString("data");
                             dbManager.setConfig(AppConst.KeyToken,AppConst.Token);
+                            dbManager.setConfig(AppConst.KeySecret,AppConst.Secret);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                         }else{
