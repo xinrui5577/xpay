@@ -37,6 +37,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     //	private MyHandler handler;
     public long lastTimePosted = System.currentTimeMillis();
     private Pattern pAlipay;
+    private Pattern pAlipay2;
     private Pattern pWeixin;
     private Handler callback;
     private MediaPlayer payComp;
@@ -52,6 +53,8 @@ public class NotificationMonitorService extends NotificationListenerService impl
         //支付宝
         String pattern = "(\\S*)通过扫码向你付款([\\d\\.]+)元";
         pAlipay = Pattern.compile(pattern);
+        pattern = "成功收款([\\d\\.]+)元。享免费提现等更多专属服务，点击查看";
+        pAlipay2 = Pattern.compile(pattern);
         pWeixin = Pattern.compile("微信支付收款([\\d\\.]+)元");
         callback = new Handler(this);
         payComp = MediaPlayer.create(this, R.raw.paycomp);
@@ -100,7 +103,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         String text = ((Bundle) bundle).getString("android.text");
         Log.i("ZYKJ", "Notification posted [" + pkgName + "]:" + title + " & " + text);
         this.lastTimePosted = System.currentTimeMillis();
-        //支付宝
+        //支付宝com.eg.android.AlipayGphone
         //com.eg.android.AlipayGphone]:支付宝通知 & 新哥通过扫码向你付款0.01元
         if (pkgName.equals("com.eg.android.AlipayGphone") && text != null) {
             // 现在创建 matcher 对象
@@ -109,8 +112,14 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 String uname = m.group(1);
                 String money = m.group(2);
                 postMethod(AliPay, money, uname);
-            } else {
-                //postError(AliPay, text);
+            } else{
+               m = pAlipay2.matcher(text);
+                if (m.find()) {
+                    String money = m.group(1);
+                    postMethod(AliPay, money, "支付宝用户");
+                }else{
+                    Log.w("ZYKJ","匹配失败"+text);
+                }
             }
         }
         //微信
