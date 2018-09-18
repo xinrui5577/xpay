@@ -19,10 +19,12 @@ import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.zhiyi.onepay.util.AppUtil;
+import com.zhiyi.onepay.util.DBManager;
 import com.zhiyi.onepay.util.RequestUtils;
 
 import org.json.JSONException;
@@ -59,6 +61,21 @@ public class NotificationMonitorService extends NotificationListenerService impl
         callback = new Handler(this);
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payRecv = MediaPlayer.create(this, R.raw.payrecv);
+        if(AppConst.AppId<1){
+            DBManager dbManager = new DBManager(this);
+            String appid = dbManager.getConfig(AppConst.KeyAppId);
+            if(!TextUtils.isEmpty(appid)){
+                AppConst.AppId = Integer.parseInt(appid);
+                String token = dbManager.getConfig(AppConst.KeyToken);
+                if(!TextUtils.isEmpty(token)){
+                    AppConst.Token = token;
+                }
+                String secret = dbManager.getConfig(AppConst.KeySecret);
+                if(!TextUtils.isEmpty(secret)){
+                    AppConst.Secret = secret;
+                }
+            }
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel mNotificationChannel = new NotificationChannel(CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
             mNotificationChannel.setDescription("个人支付的监控");
