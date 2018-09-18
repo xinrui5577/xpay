@@ -47,6 +47,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     public static final  String CHANNEL_ID          = "zhi_yi_px_pay";
 //    NotificationChannel mNotificationChannel;
+    private NotificationChannel mNotificationChannel;
 
     public void onCreate() {
         super.onCreate();
@@ -77,7 +78,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
             }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel mNotificationChannel = new NotificationChannel(CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationChannel = new NotificationChannel(CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
             mNotificationChannel.setDescription("个人支付的监控");
             getNotificationManager().createNotificationChannel(mNotificationChannel);
         }
