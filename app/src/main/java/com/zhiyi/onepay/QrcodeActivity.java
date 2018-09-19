@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -299,7 +300,9 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
                             for (int i = 0; i < list.length(); i++) {
                                 View view = addViewItem(list.getJSONObject(i));
                                 if(view!=null){
-                                    view.setBackgroundColor(getResources().getColor(colors[++flag%2],getTheme()));
+                                    if(Build.VERSION.SDK_INT>22){
+                                        view.setBackgroundColor(getResources().getColor(colors[++flag%2],getTheme()));
+                                    }
                                 }
                             }
                         }
