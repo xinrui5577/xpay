@@ -8,13 +8,13 @@ package com.zhiyi.onepay;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -45,7 +45,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private MediaPlayer payComp;
     private MediaPlayer payRecv;
 
-    public static final  String CHANNEL_ID          = "zhi_yi_px_pay";
 //    NotificationChannel mNotificationChannel;
     private NotificationChannel mNotificationChannel;
 
@@ -77,12 +76,17 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 }
             }
         }
+        Log.i("ZYKJ","Notification Monitor Service start");
+        NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            mNotificationChannel = new NotificationChannel(CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
-            mNotificationChannel.setDescription("个人支付的监控");
-            getNotificationManager().createNotificationChannel(mNotificationChannel);
+            mNotificationChannel = mNM.getNotificationChannel(AppConst.CHANNEL_ID);
+            if(mNotificationChannel == null){
+                mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+                mNotificationChannel.setDescription("个人支付的监控");
+            }
+            mNM.createNotificationChannel(mNotificationChannel);
         }
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this, CHANNEL_ID);
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);
 
         nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.mipmap.ic_launcher);
         nb.setContentText("个人支付运行中.请保持此通知一直存在");
@@ -90,12 +94,10 @@ public class NotificationMonitorService extends NotificationListenerService impl
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();
         startForeground(1, notification);
+        Log.i("ZYKJ","Notification Monitor Service started");
     }
 
-    private NotificationManager getNotificationManager()
-    {
-        return (NotificationManager) this.getSystemService(this.NOTIFICATION_SERVICE);
-    }
+
 
     public void onDestroy() {
         Intent localIntent = new Intent();
@@ -224,11 +226,11 @@ public class NotificationMonitorService extends NotificationListenerService impl
             String msg = message.obj.toString();
             Log.i("ZYKJ", msg);
             //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
-            Intent intent = new Intent();
-            intent.setAction(AppConst.IntentAction);
-            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny=" + message.obj.toString()).build();
-            intent.setData(uri);
-            sendBroadcast(intent);
+//            Intent intent = new Intent(NotificationMonitorService.this,MainActivity.class);
+//            intent.setAction(AppConst.IntentAction);
+//            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny=" + message.obj.toString()).build();
+//            intent.setData(uri);
+//            sendBroadcast(intent);
             JSONObject json;
             try {
                 json = new JSONObject(msg);

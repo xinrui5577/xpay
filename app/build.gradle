@@ -12,10 +12,10 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId 'com.zhiyi.onepay'
-        minSdkVersion 23
+        minSdkVersion 22
         targetSdkVersion 26
-        versionCode 10
-        versionName "1.2.0"
+        versionCode 12
+        versionName "1.2.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.xpay
     }

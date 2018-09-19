@@ -1,37 +1,12 @@
 package com.zhiyi.onepay;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-import android.widget.Toast;
 
-import com.google.zxing.Result;
-import com.google.zxing.decode.BitmapDecoder;
-import com.qcloud.image.ImageClient;
-import com.qcloud.image.request.GeneralOcrRequest;
 import com.zhiyi.onepay.components.ZyWebViewClient;
-import com.zhiyi.onepay.data.QrCodeData;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class WebViewActivity extends AppCompatActivity {
 

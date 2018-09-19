@@ -58,9 +58,11 @@ public class RequestUtils {
                             message.obj = response.toString();
                             handler.sendMessage(message);
                         }
+                    }else{
+                        Log.w("ZYKJ","http response error"+httpResponse.getStatusLine().getStatusCode());
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.w("ZYKJ",e);
                 }
             }
         }).start();//这个start()方法不要忘记了

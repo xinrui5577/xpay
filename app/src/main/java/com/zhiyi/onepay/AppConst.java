@@ -22,10 +22,14 @@ public class AppConst {
     public static String Token="";
     public static String Secret="";
 
-    public static final String IntentAction = "zhiyikeji";
+    public static final String IntentAction = "com.zhiyikeji.Notification";
 
     public static final int MT_Net_Response = 1;
     public static final int MT_Net_Toast = 1;
+
+    public static final  String CHANNEL_ID          = "zhi_yi_px_pay";
+    public static final  String CHANNEL_Front          = "zhi_yi_px_pay_front";
+    public static final  String CHANNEL_Test         = "zhi_yi_px_pay_test";
 
     public static final String authUrl(String api){
         return HostUrl+api+"?appid="+AppId+"&token="+Token;

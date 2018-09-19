@@ -7,18 +7,20 @@
 package com.zhiyi.onepay;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 /**
  * 后台进程.确保进入后台也在运行
@@ -28,6 +30,8 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     private IMessageHander msgHander;
     private MediaPlayer payComp;
     private PowerManager.WakeLock wakeLock;
+    public static final  String CHANNEL_ID          = "zhi_yi_px_pay";
+    private NotificationChannel mNotificationChannel;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -51,13 +55,19 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
         //声音播放也不成功
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payComp.setOnCompletionListener(this);
-
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"default");
+        Log.i("ZYKJ","MainService Start");
+        NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_Front, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationChannel.setDescription("个人支付的监控");
+            mNM.createNotificationChannel(mNotificationChannel);
+        }
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_Front);
         nb.setContentTitle("UKAFU个人支付").setTicker("UKAFU个人支付").setSmallIcon(R.mipmap.ic_launcher);
-        //nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();
         startForeground(1,notification);
+        Log.i("ZYKJ","MainService Started");
     }
 
     @Override

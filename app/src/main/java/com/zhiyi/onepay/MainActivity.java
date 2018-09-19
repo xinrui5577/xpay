@@ -6,6 +6,7 @@
 package com.zhiyi.onepay;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -17,13 +18,13 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -51,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean enableLog;
     private Handler handler;
+
+
+    private NotificationChannel mNotificationChannel;
 
     private MainService service;
     private IMessageHander msgHander = new IMessageHander() {
@@ -278,16 +282,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendNotice(){
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"default");
-        nb.setContentTitle("通知监控").setContentText("测试号通过扫码向你付款0.01元").setSmallIcon(R.mipmap.ic_launcher);
-        nb.setWhen(System.currentTimeMillis());
-        Notification notification = nb.build();
+        Log.i("ZYKJ","MainActivity Send Notice");
         NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_Test, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationChannel.setDescription("个人支付的监控");
+            mNM.createNotificationChannel(mNotificationChannel);
+            Log.i("ZYKJ","MainActivity create mNotificationChannel");
+        }
+        Notification notification = new NotificationCompat.Builder(this,AppConst.CHANNEL_Test)
+                .setContentTitle("通知监控").setContentText("测试号通过扫码向你付款0.01元").setSmallIcon(R.mipmap.ic_launcher)
+                .setWhen(System.currentTimeMillis()).setChannel(AppConst.CHANNEL_Test).build();
+
         /**
          * 注意,我们使用出来。incoming_message ID 通知。它可以是任何整数,但我们使用 资源id字符串相关
          * 通知。它将永远是一个独特的号码在你的 应用程序。
          */
-        mNM.notify(1,notification);
+        mNM.notify(2,notification);
+        Log.i("ZYKJ","MainActivity Send Notice Comp");
     }
 
     private void toggleNotificationListenerService()
