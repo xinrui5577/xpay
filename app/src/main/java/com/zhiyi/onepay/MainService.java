@@ -6,6 +6,7 @@
 
 package com.zhiyi.onepay;
 
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -21,6 +22,8 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.zhiyi.onepay.util.RequestUtils;
 
 /**
  * 后台进程.确保进入后台也在运行
@@ -100,14 +103,17 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     public void run() {
         while(true){
             try {
-                Thread.sleep(600000);
+                Thread.sleep(30000);
             } catch (InterruptedException e) {
                 Log.e("ZYKJ","service thread",e);
             }
-            Message msg = new Message();
-            msg.what = 1;
-            msg.obj = "time";
-            handler.sendMessage(msg);
+//            Message msg = new Message();
+//            msg.what = 1;
+//            msg.obj = "time";
+//            handler.sendMessage(msg);
+            //发送在线通知,保持让系统时时刻刻直到app在线
+//            RequestUtils.getRequest(AppConst.authUrl("person/active/app?version="+getApplicationContext().getApplicationInfo()),handler);
+
         }
     }
 

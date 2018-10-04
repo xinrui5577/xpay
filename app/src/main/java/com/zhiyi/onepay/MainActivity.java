@@ -120,6 +120,12 @@ public class MainActivity extends AppCompatActivity {
         enableLog = TRUE.equals(log);
         swt_log.setChecked(enableLog);
 
+        try {
+            AppConst.version = getPackageManager().getPackageInfo(getPackageName(),0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
         IntentFilter filter = new IntentFilter(AppConst.IntentAction);
         registerReceiver(receiver,filter);
@@ -146,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(enableLog!=isChecked) {
                     enableLog = isChecked;
+                    if(enableLog){
+                        sendNotice();
+                    }
                     dbm.setConfig(AppConst.KeyBoolLog, enableLog ? TRUE : FALSE);
                     sb.delete(0,sb.length());
                     logView.setText("");
@@ -217,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggleNotificationListenerService();
         swt_service.setChecked(true);
-        sendNotice();
+
         //微信支付宝开启
 
     }

@@ -18,6 +18,8 @@ public class AppConst {
     /**传输数据为URL的KEY*/
     public static final String ACTION_URL = "a_url";
 
+    public static int version;
+
     public static int AppId=0;
     public static String Token="";
     public static String Secret="";

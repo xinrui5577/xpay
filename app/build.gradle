@@ -14,10 +14,13 @@ android {
         applicationId 'com.zhiyi.onepay'
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 12
-        versionName "1.2.2"
+        versionCode 15
+        versionName "1.2.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.xpay
+        ndk {
+            abiFilters 'armeabi-v7a' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
     }
     buildTypes {
         release {
@@ -47,6 +50,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:2.2.2'
     implementation 'com.android.support:design:26.0.0-beta1'
     compile 'com.github.open-android:Zxing:v1.0.3'
+    //注释掉原有bugly的仓库
+    compile 'com.tencent.bugly:crashreport_upgrade:latest.release'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0
+    compile 'com.tencent.bugly:nativecrashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
 }
 
 

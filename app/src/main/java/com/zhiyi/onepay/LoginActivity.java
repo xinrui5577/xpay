@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.tencent.bugly.Bugly;
 import com.zhiyi.onepay.util.AppUtil;
 import com.zhiyi.onepay.util.DBManager;
 import com.zhiyi.onepay.util.RequestUtils;
@@ -94,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-
+        Bugly.init(getApplicationContext(), "ff0995764e", false);
 
         dbManager = new DBManager(this);
         String appid = readData(AppConst.KeyAppId);
@@ -102,7 +103,7 @@ public class LoginActivity extends AppCompatActivity {
             mAppIdView.setText(appid);
             AppConst.AppId = Integer.parseInt(appid);
             String token = readData(AppConst.KeyToken);
-            if(!TextUtils.isEmpty(token)){
+            if(!TextUtils.isEmpty(token) && !"123456".equals(token)){
                 mTokenView.setText(token);
                 attemptLogin();
             }
@@ -151,7 +152,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public void act_GetToken(View view) {
         Intent intent = new Intent();
-        intent.setData(Uri.parse(AppConst.HostUrl+"person/index/getToken"));//Url 就是你要打开的网址
+        intent.setData(Uri.parse(AppConst.HostUrl+"person/index/getToken/appid/"+AppConst.AppId));//Url 就是你要打开的网址
         intent.setAction(Intent.ACTION_VIEW);
         this.startActivity(intent); //启动浏览器
     }

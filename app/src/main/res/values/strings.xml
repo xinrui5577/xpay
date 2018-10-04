@@ -5,7 +5,7 @@
     <!--<string name="title_activity_login">登录</string>-->
 
     <!-- Strings related to login -->
-    <string name="action_sign_in">确认</string>
+    <string name="action_sign_in">登录</string>
     <string name="action_to_open">"支付服务"</string>
     <string name="action_to_wx">微信</string>
     <string name="action_to_zfb">支付宝</string>
@@ -20,7 +20,7 @@
     <string name="textOff">关闭</string>
     <string name="app_id">appid</string>
     <string name="app_token">token</string>
-    <string name="login_help">\n1:复制APPID,登录后台,选择个人支付,添加APPID,\n2:添加成功后可以获得token.将token填入上方.\n3:点击登录</string>
+    <string name="login_help">\n1:点击获取Token,捐赠1元可以获取一个TOKEN</string>
     <string name="title_activity_regist">regist</string>
 
     <!-- Strings related to register -->
@@ -30,9 +30,7 @@
     <string name="error_invalid_mobile">手机号无效</string>
     <string name="error_invalid_password">密码太短</string>
     <string name="error_field_required">不能为空</string>
-
     <string name="notify_content">个人收款运行中</string>
-
     <string name="title_activity_qrcode">二维码管理</string>
     <string name="dummy_button">添加二维码</string>
     <string name="dummy_content">没有可用二维码\n请添加二维码</string>

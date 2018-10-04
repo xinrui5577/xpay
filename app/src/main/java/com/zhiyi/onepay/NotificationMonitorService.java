@@ -33,7 +33,7 @@ import org.json.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback {
+public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback,Runnable {
     private static final String AliPay = "ALIPAY";
     private static final String WeixinPay = "WXPAY";
     //	private MyHandler handler;
@@ -44,9 +44,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private Handler callback;
     private MediaPlayer payComp;
     private MediaPlayer payRecv;
-
-//    NotificationChannel mNotificationChannel;
-    private NotificationChannel mNotificationChannel;
 
     public void onCreate() {
         super.onCreate();
@@ -76,15 +73,16 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 }
             }
         }
+        new Thread(this).start();
         Log.i("ZYKJ","Notification Monitor Service start");
         NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            mNotificationChannel = mNM.getNotificationChannel(AppConst.CHANNEL_ID);
-            if(mNotificationChannel == null){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mNM!=null){
+            NotificationChannel mNotificationChannel = mNM.getNotificationChannel(AppConst.CHANNEL_ID);
+            if (mNotificationChannel == null) {
                 mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
                 mNotificationChannel.setDescription("个人支付的监控");
+                mNM.createNotificationChannel(mNotificationChannel);
             }
-            mNM.createNotificationChannel(mNotificationChannel);
         }
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);
 
@@ -120,7 +118,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
             return;
         }
         String title = bundle.getString("android.title");
-        String text = ((Bundle) bundle).getString("android.text");
+        String text = bundle.getString("android.text");
         Log.i("ZYKJ", "Notification posted [" + pkgName + "]:" + title + " & " + text);
         this.lastTimePosted = System.currentTimeMillis();
         //支付宝com.eg.android.AlipayGphone
@@ -151,9 +149,21 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 String uname = "微信用户";
                 String money = m.group(1);
                 postMethod(WeixinPay, money, uname);
-            } else {
-                //postError(WeixinPay, text);
             }
+        }
+    }
+
+
+    @Override
+    public void run() {
+        while(true){
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                Log.e("ZYKJ","service thread",e);
+            }
+            //发送在线通知,保持让系统时时刻刻直到app在线
+            postState();
         }
     }
 
@@ -162,7 +172,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         Bundle localObject = paramStatusBarNotification.getNotification().extras;
         String pkgName = paramStatusBarNotification.getPackageName();
         String title = localObject.getString("android.title");
-        String text = ((Bundle) localObject).getString("android.text");
+        String text = (localObject).getString("android.text");
         Log.i("ZYKJ", "Notification removed [" + pkgName + "]:" + title + " & " + text);
     }
 
@@ -173,9 +183,9 @@ public class NotificationMonitorService extends NotificationListenerService impl
     /**
      * 获取道的支付通知发送到服务器
      *
-     * @param payType
-     * @param money
-     * @param username
+     * @param payType 支付方式
+     * @param money 支付金额
+     * @param username 支付者名字
      */
     public void postMethod(String payType, String money, String username) {
 //		Uri u = new Uri.Builder().path("pay").appendQueryParameter("type", payType)
@@ -198,22 +208,16 @@ public class NotificationMonitorService extends NotificationListenerService impl
                         + "&sign=" + sign
                         + "&time=" + time
                         + "&version=" + version
-                , callback);
+                , callback,1);
 
     }
 
     /**
      * 发送错误信息到服务器
      *
-     * @param payType
-     * @param error
      */
-    public void postError(String payType, String error) {
-//		Uri u = new Uri.Builder().path("log")
-//				.appendQueryParameter("msg", error).build();
-//		Intent intent = new Intent("notify",u);
-//		sendBroadcast(intent);
-        RequestUtils.getRequest(AppConst.HostUrl + "person/notify/log?type=" + payType + "&error=" + error, callback);
+    public void postState() {
+		RequestUtils.getRequest(AppConst.authUrl("person/state/online")+"&version="+AppConst.version,callback,3);
     }
 
     @Override
@@ -221,6 +225,9 @@ public class NotificationMonitorService extends NotificationListenerService impl
         int what = message.what;
         if (what == AppConst.MT_Net_Response) {
             if (message.obj == null) {
+                return true;
+            }
+            if(message.arg1 == 3){
                 return true;
             }
             String msg = message.obj.toString();
