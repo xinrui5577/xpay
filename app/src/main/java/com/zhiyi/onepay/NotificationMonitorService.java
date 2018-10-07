@@ -86,7 +86,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
         }
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);
 
-        nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.mipmap.ic_launcher);
+        nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.drawable.icon);
         nb.setContentText("个人支付运行中.请保持此通知一直存在");
         //nb.setContent(new RemoteViews(getPackageName(),R.layout.layout));
         nb.setWhen(System.currentTimeMillis());

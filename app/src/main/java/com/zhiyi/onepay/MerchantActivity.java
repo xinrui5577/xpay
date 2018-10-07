@@ -50,8 +50,8 @@ public class MerchantActivity extends AppCompatActivity implements Handler.Callb
         btn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog  dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("确定要重置?").setIcon(R.drawable.ic_launcher_foreground).
-                        setPositiveButton(R.string.action_sign_in, new DialogInterface.OnClickListener() {
+                AlertDialog  dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("确定要重置?").setIcon(R.drawable.icon).
+                        setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         RequestUtils.getRequest(AppConst.authUrl("person/merchant/resetSecret"),new Handler(MerchantActivity.this),2);

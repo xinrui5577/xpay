@@ -28,6 +28,7 @@ import com.qcloud.image.ImageClient;
 import com.qcloud.image.request.GeneralOcrRequest;
 import com.zhiyi.onepay.data.QrCodeData;
 import com.zhiyi.onepay.util.RequestUtils;
+import com.zhiyi.onepay.util.SystemProgramUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,12 +88,14 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
 //        Intent pic = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //        startActivityForResult(pic, PICK_CODE);
 
-        Intent intent = new Intent("android.intent.action.GET_CONTENT");
-        intent.putExtra("scale", true);//设置可以缩放
-        intent.putExtra("crop", true);//设置可以裁剪
-        intent.setType("image/*");//设置需要从系统选择的内容：图片
-        //intent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);//设置输出位置
-        startActivityForResult(intent, PICK_CODE);
+//        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+//        intent.putExtra("scale", true);//设置可以缩放
+//        intent.putExtra("crop", true);//设置可以裁剪
+//        intent.setType("image/*");//设置需要从系统选择的内容：图片
+//        //intent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);//设置输出位置
+//        startActivityForResult(intent, PICK_CODE);
+
+        SystemProgramUtils.zhaopian(this);
     }
 
     @Override

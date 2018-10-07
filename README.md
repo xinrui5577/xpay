@@ -13,7 +13,9 @@
 	那张三和李四都说要还100怎么办?那就张三.你还99.99;李四你还100.01 说好的数字.倒是后我收到多少钱就是谁还的.
 	所以我们一个金额的二维码要多设置几张.
 ## 接入:
-	先APP装好 [下载地址](https://fir.im/nmc9) , [PHP 接入 demo](https://gitee.com/sipengcode/quick-pay)
+	先APP装好 
+	[APP下载地址](https://fir.im/nmc9/) , 
+	[PHP接入源码](https://gitee.com/sipengcode/quick-pay/)
 ## 二维码识别:
 	zxing 识别二维码,网上教程很多.这也是copy过来的.
 	

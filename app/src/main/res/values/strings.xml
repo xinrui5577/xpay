@@ -6,6 +6,7 @@
 
     <!-- Strings related to login -->
     <string name="action_sign_in">登录</string>
+    <string name="action_confirm">确定</string>
     <string name="action_to_open">"支付服务"</string>
     <string name="action_to_wx">微信</string>
     <string name="action_to_zfb">支付宝</string>

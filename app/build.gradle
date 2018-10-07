@@ -14,8 +14,8 @@ android {
         applicationId 'com.zhiyi.onepay'
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 16
-        versionName "1.2.6"
+        versionCode 17
+        versionName "1.2.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.xpay
         ndk {
