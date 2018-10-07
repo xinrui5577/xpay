@@ -1,3 +1,6 @@
+<a href='https://gitee.com/DaLianZhiYiKeJi/xpay/stargazers'><img src='https://gitee.com/DaLianZhiYiKeJi/xpay/badge/star.svg?theme=dark' alt='star'></img></a>
+<a href='https://gitee.com/DaLianZhiYiKeJi/xpay/members'><img src='https://gitee.com/DaLianZhiYiKeJi/xpay/badge/fork.svg?theme=gray' alt='fork'></img></a>
+
 [演示地址:http://demo.ukafu.com/](http://demo.ukafu.com/)
 
 <img src="https://images.gitee.com/uploads/images/2018/0914/141509_bf37f6ae_2525.jpeg" alt="个人支付PC页面" /> 
@@ -14,8 +17,8 @@
 	所以我们一个金额的二维码要多设置几张.
 ## 接入:
 	先APP装好 
-	[APP下载地址](https://fir.im/nmc9/) , 
-	[PHP接入源码](https://gitee.com/sipengcode/quick-pay/)
+[APP下载地址](https://fir.im/nmc9/) , 
+[PHP接入源码](https://gitee.com/sipengcode/quick-pay/)
 ## 二维码识别:
 	zxing 识别二维码,网上教程很多.这也是copy过来的.
 	
