@@ -1,7 +1,7 @@
 /**
- *  个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
- *  大连致一科技有限公司
- * */
+ 个人收款 https://gitee.com/DaLianZhiYiKeJi/xpay
+ 大连致一科技有限公司
+ */
 
 package com.zhiyi.onepay;
 
@@ -13,9 +13,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,15 +23,17 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.tencent.bugly.Bugly;
 import com.zhiyi.onepay.util.AppUtil;
 import com.zhiyi.onepay.util.DBManager;
 import com.zhiyi.onepay.util.RequestUtils;
+import com.zhiyi.onepay.util.ToastUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 
 /**
@@ -39,14 +41,7 @@ import org.json.JSONObject;
  */
 public class LoginActivity extends AppCompatActivity {
 
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
+    private final String TAG_ZYKJ="ZYKJ";
 
 
     // UI references.
@@ -54,17 +49,17 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mTokenView;
     private View mProgressView;
     private View mLoginFormView;
-    private TextView helpView;
     private DBManager dbManager;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        handler = new Handler();
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mAppIdView = findViewById(R.id.app_id);
         mTokenView = findViewById(R.id.token);
-        helpView = findViewById(R.id.sign_in_help_text);
         mTokenView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -76,15 +71,17 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        Button getToken = findViewById(R.id.btn_getToken);
+        Button getToken = (Button)findViewById(R.id.btn_getToken);
         getToken.setOnClickListener(new OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 act_GetToken(v);
             }
+
         });
 
-        Button mEmailSignInButton = findViewById(R.id.sign_in_button);
+        Button mEmailSignInButton = (Button)findViewById(R.id.sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -117,32 +114,46 @@ public class LoginActivity extends AppCompatActivity {
         String appUnid = AppUtil.getUniqueId(this);
         if(appUnid!=null){
             showProgress(true);
-            Handler.Callback callback= new Handler.Callback(){
-                @Override
-                public boolean handleMessage(Message message) {
-                    try {
 
-                        JSONObject json = new JSONObject(message.obj.toString());
+            String sign= AppUtil.toMD5("zhiyikeji"+appUnid);
+            RequestUtils.getRequest(AppConst.HostUrl + "person/api/getAppId/unid/" + appUnid + "/sign/" + sign, new IHttpResponse() {
+                @Override
+                public void OnHttpData(String rs) {
+                    if(rs==null || rs.isEmpty()){
+                        ToastUtil.show(LoginActivity.this, "获取失败,空返回值");
+                        return;
+                    }
+                    try {
+                        final JSONObject json = new JSONObject(rs);
                         if(json.getInt("code")==0){
                             JSONObject data = json.getJSONObject("data");
                             String appId = data.getString("appid");
                             AppConst.AppId = Integer.parseInt(appId);
-                            mAppIdView.setText(appId);
-                            dbManager.setConfig(AppConst.KeyAppId,appId);
-                            helpView.setText(data.getString("help"));
+
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    dbManager.setConfig(AppConst.KeyAppId,AppConst.AppId+"");
+                                    mAppIdView.setText(AppConst.AppId);
+                                }
+                            };
+                            handler.post(runnable);
+
                         }else{
-                            Toast.makeText(LoginActivity.this, json.getString("msg"), Toast.LENGTH_SHORT).show();
+                            ToastUtil.show(LoginActivity.this, json.getString("msg"));
                         }
-                    }catch (JSONException je){
-                        Toast.makeText(LoginActivity.this, je.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        Log.w(TAG_ZYKJ,e.getMessage());
+                        ToastUtil.show(LoginActivity.this, "获取失败,JSON解析失败");
                     }
-                    showProgress(false);
-                    return false;
                 }
-            };
-            Handler idHander = new Handler(callback);
-            String sign= AppUtil.toMD5("zhiyikeji"+appUnid);
-            RequestUtils.getRequest(AppConst.HostUrl+"person/api/getAppId/unid/"+appUnid+"/sign/"+sign,idHander);
+
+                @Override
+                public void OnHttpDataError(IOException e) {
+
+                }
+            });
+            showProgress(false);
         }
     }
 
@@ -188,18 +199,15 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            RequestUtils.getRequest(AppConst.HostUrl+"person/api/login/appid/"+appid+"/token/"+token,callback);
-        }
-    }
-
-    private Handler callback = new Handler(
-            new Handler.Callback() {
+            RequestUtils.getRequest(AppConst.HostUrl + "person/api/login/appid/" + appid + "/token/" + token, new IHttpResponse() {
                 @Override
-                public boolean handleMessage(Message message) {
-                    showProgress(false);
+                public void OnHttpData(String rs) {
+                    if(rs==null || rs.isEmpty()){
+                        ToastUtil.show(LoginActivity.this, "获取失败,空返回值");
+                        return;
+                    }
                     try {
-
-                        JSONObject json = new JSONObject(message.obj.toString());
+                        JSONObject json = new JSONObject(rs);
                         if(json.getInt("code")==0){
                             AppConst.Secret = json.getString("data");
                             dbManager.setConfig(AppConst.KeyToken,AppConst.Token);
@@ -207,15 +215,23 @@ public class LoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                         }else{
-                            Toast.makeText(LoginActivity.this, json.getString("msg"), Toast.LENGTH_SHORT).show();
+                            ToastUtil.show(LoginActivity.this, json.getString("msg"));
                         }
                     }catch (JSONException je){
-                        Toast.makeText(LoginActivity.this, je.getMessage(), Toast.LENGTH_SHORT).show();
+                        ToastUtil.show(LoginActivity.this, je.getMessage());
                     }
-                    return false;
                 }
-            }
-    );
+
+                @Override
+                public void OnHttpDataError(IOException e) {
+
+                }
+            });
+            showProgress(false);
+
+        }
+    }
+
 
 
 

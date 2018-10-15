@@ -10,7 +10,7 @@
     <string name="action_to_open">"支付服务"</string>
     <string name="action_to_wx">微信</string>
     <string name="action_to_zfb">支付宝</string>
-    <string name="action_to_log">显示日志</string>
+    <string name="action_to_log">日志记录</string>
     <string name="action_to_privileges">服务权限</string>
     <string name="action_open_setting">打开权限设置</string>
     <string name="action_order">订单管理</string>
@@ -22,7 +22,7 @@
     <string name="app_id">appid</string>
     <string name="app_token">token</string>
     <string name="login_help">\n1:点击获取Token,捐赠1元可以获取一个TOKEN</string>
-    <string name="title_activity_regist">regist</string>
+    <string name="title_activity_log">日志记录</string>
 
     <!-- Strings related to register -->
     <string name="prompt_mobile">手机号</string>

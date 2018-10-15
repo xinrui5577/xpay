@@ -6,7 +6,6 @@
 
 package com.zhiyi.onepay;
 
-import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,7 +22,6 @@ import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.zhiyi.onepay.util.RequestUtils;
 
 /**
  * 后台进程.确保进入后台也在运行
@@ -65,7 +63,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
             mNotificationChannel.setDescription("个人支付的监控");
             mNM.createNotificationChannel(mNotificationChannel);
         }
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_Front);
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_Front);//
         nb.setContentTitle("UKAFU个人支付").setTicker("UKAFU个人支付").setSmallIcon(R.mipmap.ic_launcher);
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();

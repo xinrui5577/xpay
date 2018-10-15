@@ -4,8 +4,8 @@
     android:installLocation="internalOnly">
 
     <uses-sdk
-        android:minSdkVersion="23"
-        android:targetSdkVersion="26" />
+        android:minSdkVersion="19"
+        android:targetSdkVersion="27" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -60,6 +60,9 @@
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+            <intent-filter android:priority="500">
+                <action android:name="com.zhiyikeji.Notification" />
+            </intent-filter>
         </receiver>
 
         <provider
@@ -87,8 +90,8 @@
             android:label="支付服务" />
 
         <activity
-            android:name=".RegistActivity"
-            android:label="@string/title_activity_regist" />
+            android:name=".LogActivity"
+            android:label="@string/title_activity_log" />
         <activity
             android:name=".WebViewActivity"
             android:theme="@style/FullscreenTheme" />

@@ -9,13 +9,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.PowerManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
@@ -30,10 +30,11 @@ import com.zhiyi.onepay.util.RequestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotificationMonitorService extends NotificationListenerService implements Handler.Callback,Runnable {
+public class NotificationMonitorService extends NotificationListenerService implements Runnable {
     private static final String AliPay = "ALIPAY";
     private static final String WeixinPay = "WXPAY";
     //	private MyHandler handler;
@@ -41,9 +42,11 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private Pattern pAlipay;
     private Pattern pAlipay2;
     private Pattern pWeixin;
-    private Handler callback;
     private MediaPlayer payComp;
     private MediaPlayer payRecv;
+    private MediaPlayer payNetWorkError;
+    private PowerManager.WakeLock wakeLock;
+    private DBManager dbManager;
 
     public void onCreate() {
         super.onCreate();
@@ -55,11 +58,11 @@ public class NotificationMonitorService extends NotificationListenerService impl
         pattern = "成功收款([\\d\\.]+)元。享免费提现等更多专属服务，点击查看";
         pAlipay2 = Pattern.compile(pattern);
         pWeixin = Pattern.compile("微信支付收款([\\d\\.]+)元");
-        callback = new Handler(this);
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payRecv = MediaPlayer.create(this, R.raw.payrecv);
+        payNetWorkError = MediaPlayer.create(this, R.raw.networkerror);
+        dbManager = new DBManager(this);
         if(AppConst.AppId<1){
-            DBManager dbManager = new DBManager(this);
             String appid = dbManager.getConfig(AppConst.KeyAppId);
             if(!TextUtils.isEmpty(appid)){
                 AppConst.AppId = Integer.parseInt(appid);
@@ -84,7 +87,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 mNM.createNotificationChannel(mNotificationChannel);
             }
         }
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);//
 
         nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.drawable.icon);
         nb.setContentText("个人支付运行中.请保持此通知一直存在");
@@ -92,12 +95,22 @@ public class NotificationMonitorService extends NotificationListenerService impl
         nb.setWhen(System.currentTimeMillis());
         Notification notification = nb.build();
         startForeground(1, notification);
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        //保持cpu一直运行，不管屏幕是否黑屏
+        if(pm!=null && wakeLock == null) {
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getCanonicalName());
+            wakeLock.acquire();
+        }
         Log.i("ZYKJ","Notification Monitor Service started");
     }
 
 
-
     public void onDestroy() {
+        if(wakeLock!=null){
+            wakeLock.release();
+            wakeLock = null;
+        }
         Intent localIntent = new Intent();
         localIntent.setClass(this, NotificationMonitorService.class);
         startService(localIntent);
@@ -158,7 +171,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     public void run() {
         while(true){
             try {
-                Thread.sleep(30000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 Log.e("ZYKJ","service thread",e);
             }
@@ -169,11 +182,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
 
     public void onNotificationRemoved(StatusBarNotification paramStatusBarNotification) {
-        Bundle localObject = paramStatusBarNotification.getNotification().extras;
-        String pkgName = paramStatusBarNotification.getPackageName();
-        String title = localObject.getString("android.title");
-        String text = (localObject).getString("android.text");
-        Log.i("ZYKJ", "Notification removed [" + pkgName + "]:" + title + " & " + text);
+        if(Build.VERSION.SDK_INT>=19) {
+            Bundle localObject = paramStatusBarNotification.getNotification().extras;
+            String pkgName = paramStatusBarNotification.getPackageName();
+            String title = localObject.getString("android.title");
+            String text = (localObject).getString("android.text");
+            Log.i("ZYKJ", "Notification removed [" + pkgName + "]:" + title + " & " + text);
+        }
     }
 
     public int onStartCommand(Intent paramIntent, int paramInt1, int paramInt2) {
@@ -187,13 +202,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
      * @param money 支付金额
      * @param username 支付者名字
      */
-    public void postMethod(String payType, String money, String username) {
+    public void postMethod(final String payType,final String money,final String username) {
 //		Uri u = new Uri.Builder().path("pay").appendQueryParameter("type", payType)
 //				.appendQueryParameter("money", money).appendQueryParameter("uname", username).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
 //		String sec = "sec";
-
+        dbManager.addLog("new order:"+payType+","+money+","+username,101);
         payRecv.start();
         String app_id = "" + AppConst.AppId;
         String rndStr = AppUtil.randString(16);
@@ -208,7 +223,18 @@ public class NotificationMonitorService extends NotificationListenerService impl
                         + "&sign=" + sign
                         + "&time=" + time
                         + "&version=" + version
-                , callback,1);
+                , new IHttpResponse() {
+                    @Override
+                    public void OnHttpData(String data) {
+                        dbManager.addLog(data,200);
+                        handleMessage(data,1);
+                    }
+
+                    @Override
+                    public void OnHttpDataError(IOException e) {
+                        dbManager.addLog("http error,"+payType+","+money+","+username+":"+e.getMessage(),500);
+                    }
+                });
 
     }
 
@@ -217,20 +243,27 @@ public class NotificationMonitorService extends NotificationListenerService impl
      *
      */
     public void postState() {
-		RequestUtils.getRequest(AppConst.authUrl("person/state/online")+"&version="+AppConst.version,callback,3);
+		RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&version=" + AppConst.version, new IHttpResponse() {
+            @Override
+            public void OnHttpData(String data) {
+                handleMessage(data,3);
+            }
+
+            @Override
+            public void OnHttpDataError(IOException e) {
+                payNetWorkError.start();
+            }
+        });
     }
 
-    @Override
-    public boolean handleMessage(Message message) {
-        int what = message.what;
-        if (what == AppConst.MT_Net_Response) {
-            if (message.obj == null) {
+    public boolean handleMessage(String message,int arg1) {
+            if (message == null||message.isEmpty()) {
                 return true;
             }
-            if(message.arg1 == 3){
+            if(arg1 == 3){
                 return true;
             }
-            String msg = message.obj.toString();
+            String msg = message;
             Log.i("ZYKJ", msg);
             //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
 //            Intent intent = new Intent(NotificationMonitorService.this,MainActivity.class);
@@ -252,10 +285,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 Log.w("ZYKJ", e);
             }
 
-        } else if (what == AppConst.MT_Net_Toast) {
-            Log.i("ZYKJ", message.obj.toString());
-            //Toast.makeText(this, message.obj.toString(), Toast.LENGTH_SHORT).show();
-        }
         return true;
     }
 }

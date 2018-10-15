@@ -8,15 +8,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Message;
+import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,12 +27,14 @@ import com.qcloud.image.request.GeneralOcrRequest;
 import com.zhiyi.onepay.data.QrCodeData;
 import com.zhiyi.onepay.util.RequestUtils;
 import com.zhiyi.onepay.util.SystemProgramUtils;
+import com.zhiyi.onepay.util.ToastUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class QrcodeActivity extends AppCompatActivity implements Handler.Callback {
+public class QrcodeActivity extends AppCompatActivity {
 
     public final int ARG_TYPE_QRCODELIST = 1;
     public final int ARG_TYPE_ADD = 2;
@@ -57,30 +57,43 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
     private View mContentView;
     private LinearLayout container;
 
+    private ImageClient imageClient;
     private Handler handler;
 
-    private View.OnClickListener readClick = new View.OnClickListener(){
+
+    private View.OnClickListener readClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             readImg();
         }
     };
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_qrcode);
 
-        container = findViewById(R.id.container);
+        container = (LinearLayout)findViewById(R.id.container);
         mContentView = findViewById(R.id.fullscreen_content);
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(readClick);
-
-        handler = new Handler(getMainLooper(), this);
+        handler = new Handler();
 
         findViewById(R.id.dummy_button).setOnClickListener(readClick);
 
-        RequestUtils.getRequest(AppConst.authUrl("person/qrcode/index"), handler, ARG_TYPE_QRCODELIST);
+        RequestUtils.getRequest(AppConst.authUrl("person/qrcode/index"), new IHttpResponse() {
+            @Override
+            public void OnHttpData(String data) {
+                handleMessage(data, ARG_TYPE_QRCODELIST);
+            }
+
+            @Override
+            public void OnHttpDataError(IOException e) {
+
+            }
+        });
+
     }
 
 
@@ -103,24 +116,25 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
         if (requestCode == PICK_CODE) {
             if (intent != null) {
                 Uri uri = intent.getData();
-                if(uri == null){
-                    Toast.makeText(this,"目标数据为空",Toast.LENGTH_LONG);
+                if (uri == null) {
+                    Toast.makeText(this, "目标数据为空", Toast.LENGTH_LONG);
                     return;
                 }
                 Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                if(cursor == null){
-                    Toast.makeText(this,"找不到数据",Toast.LENGTH_LONG);
+                if (cursor == null) {
+                    Toast.makeText(this, "找不到数据", Toast.LENGTH_LONG);
                     return;
                 }
                 cursor.moveToFirst();
                 int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                if(idx<0){
-                    Toast.makeText(this,"无法访问相册",Toast.LENGTH_LONG);
+                if (idx < 0) {
+                    Toast.makeText(this, "无法访问相册", Toast.LENGTH_LONG);
                     return;
                 }
                 String currentPhotoString = cursor.getString(idx);
                 cursor.close();
-                Bitmap bitmap = resizePhono(currentPhotoString);
+//                Bitmap bitmap = resizePhono(currentPhotoString);
+                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoString);
                 if (bitmap == null) {
                     Log.w(LOG_TAG, "bitmap is null" + currentPhotoString);
                     String[] mPermissionList = new String[]{
@@ -158,6 +172,7 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
         double radio = Math.max(options.outWidth * 1.0d / 1024f, options.outHeight * 1.0d / 1024f);
         options.inSampleSize = (int) Math.ceil(radio);
         options.inJustDecodeBounds = false;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
         return BitmapFactory.decodeFile(currentPhotoString, options);
     }
 
@@ -177,9 +192,9 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
         }
     }
 
-    private ImageClient imageClient;
+//    private ImageClient imageClient;
 
-    private void readTxt(final String file,final String url) {
+    private void readTxt(final String file, final String url) {
         final int type;
         if (url.toUpperCase().startsWith("WXP://")) {
             type = QrCodeData.TYPE_WX;
@@ -200,7 +215,7 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
                     String appId = "1252008836";
                     String secretId = "AKIDUJ5ZBdw7MivIfx7C82mLFe9aEiJksLxX";
                     String secretKey = "BB0ra9oOEwcOaeXdbTAg4LRMXouqgT6Y";
-                    imageClient = new ImageClient(appId, secretId, secretKey);
+                    imageClient = new ImageClient(appId, secretId, secretKey, ImageClient.NEW_DOMAIN_recognition_image_myqcloud_com);
                 }
                 File tagImage;
                 try {
@@ -217,7 +232,7 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
 
                 QrCodeData qrData = new QrCodeData();
                 qrData.money = "0";
-                qrData.name="";
+                qrData.name = "";
                 try {
                     JSONObject jsonObject = new JSONObject(ret);
                     int code = jsonObject.getInt("code");
@@ -274,7 +289,7 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
                             }
                         }
                     }
-                    if(!qrData.name.matches("^\\S+$")){
+                    if (!qrData.name.matches("^\\S+$")) {
                         qrData.name = "";
                     }
                     qrData.type = type;
@@ -283,68 +298,85 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
                 }
 
                 Log.i(LOG_TAG, qrData.money + qrData.name);
-                RequestUtils.getRequest(AppConst.authUrl("person/qrcode/upload")+"&money="+qrData.money+"&name="+qrData.name+"&code="+url,handler,ARG_TYPE_ADD);
+                RequestUtils.getRequest(AppConst.authUrl("person/qrcode/upload") + "&money=" + qrData.money + "&name=" + qrData.name + "&code=" + url, new IHttpResponse() {
+                    @Override
+                    public void OnHttpData(String data) {
+                        handleMessage(data, ARG_TYPE_ADD);
+                    }
+
+                    @Override
+                    public void OnHttpDataError(IOException e) {
+
+                    }
+                });
+
             }
         }).start();
     }
 
-    private HashMap<String,View> codeMap = new HashMap<>();
-    @Override
-    public boolean handleMessage(Message msg) {
-        if (msg.what == AppConst.MT_Net_Response) {
-            if (msg.arg1 == ARG_TYPE_QRCODELIST) {
+    private HashMap<String, View> codeMap = new HashMap<>();
+
+    public boolean handleMessage(final String msg, final int arg1) {
+        if (msg == null || msg.isEmpty()) {
+            return false;
+        }
+        Runnable runner = new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    JSONObject obj = new JSONObject(msg.obj.toString());
-                    if (obj.getInt("code") == 0) {
-                        JSONArray list = obj.getJSONArray("data");
-                        int[] colors = new int[]{R.color.colorPrimary,R.color.colorPrimaryDark};
-                        if (list != null && list.length() > 0) {
-                            int flag = 0;
-                            for (int i = 0; i < list.length(); i++) {
-                                View view = addViewItem(list.getJSONObject(i));
-                                if(view!=null){
-                                    if(Build.VERSION.SDK_INT>22){
-                                        view.setBackgroundColor(getResources().getColor(colors[++flag%2],getTheme()));
+                    if (arg1 == ARG_TYPE_QRCODELIST) {
+
+                        JSONObject obj = new JSONObject(msg);
+                        if (obj.getInt("code") == 0) {
+                            JSONArray list = obj.getJSONArray("data");
+                            int[] colors = new int[]{R.color.colorPrimary, R.color.colorPrimaryDark};
+                            if (list != null && list.length() > 0) {
+                                int flag = 0;
+                                for (int i = 0; i < list.length(); i++) {
+                                    View view = addViewItem(list.getJSONObject(i));
+                                    if (view != null) {
+                                        if (Build.VERSION.SDK_INT > 22) {
+                                            view.setBackgroundColor(getResources().getColor(colors[++flag % 2], getTheme()));
+                                        }
                                     }
                                 }
                             }
+
+                        } else {
+                            ToastUtil.show(QrcodeActivity.this, obj.getString("msg"));
+                        }
+                    } else if (arg1 == ARG_TYPE_ADD) {
+                        JSONObject obj = new JSONObject(msg);
+                        if (obj.getInt("code") == 0) {
+                            JSONObject data = obj.getJSONObject("data");
+                            updateView(data);
+                        } else {
+                            ToastUtil.show(QrcodeActivity.this, obj.getString("msg"));
                         }
 
-                    } else {
-                        Toast.makeText(this, obj.getString("msg"), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.w("ZYKJ",e.getMessage());
                 }
-            }else if(msg.arg1 == ARG_TYPE_ADD){
-                try {
-                    JSONObject obj = new JSONObject(msg.obj.toString());
-                    if (obj.getInt("code") == 0) {
-                        JSONObject data = obj.getJSONObject("data");
-                        updateView(data);
-                    } else {
-                        Toast.makeText(this, obj.getString("msg"), Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (codeMap.size() > 0) {
+                    mContentView.setVisibility(View.INVISIBLE);
                 }
             }
-            if(codeMap.size()>0){
-                mContentView.setVisibility(View.VISIBLE);
-            }
-        }
+        };
+        handler.post(runner);
         return false;
     }
+
 
     private View addViewItem(JSONObject data) {
 
         try {
-            if(!data.has("money_round")){
+            if (!data.has("money_round")) {
                 return null;
             }
             Object o = data.get("money_round");
-            String money = ""+o;
-            if(codeMap.containsKey(money)){
+            String money = "" + o;
+            if (codeMap.containsKey(money)) {
                 updateView(data);
                 return null;
             }
@@ -352,59 +384,59 @@ public class QrcodeActivity extends AppCompatActivity implements Handler.Callbac
 
             TextView btn_add = view.findViewById(R.id.qr_money);
             btn_add.setText(money);
-            updateText(data,view);
-            codeMap.put(money,view);
+            updateText(data, view);
+            codeMap.put(money, view);
             container.addView(view);
             return view;
         } catch (JSONException e) {
-            Log.e(LOG_TAG,"获取money_round失败"+data.toString());
-            Log.w(LOG_TAG,e);
+            Log.e(LOG_TAG, "获取money_round失败" + data.toString());
+            Log.w(LOG_TAG, e);
             return null;
         }
 
     }
 
-    public void updateView(JSONObject data){
+    public void updateView(JSONObject data) {
         try {
-            if(!data.has("money_round")){
+            if (!data.has("money_round")) {
                 return;
             }
             Object o = data.get("money_round");
-            String key = ""+o;
-            if(data.has("add")) {
+            String key = "" + o;
+            if (data.has("add")) {
                 int add = data.getInt("add");
                 if (add == 0) {
                     return;
                 }
             }
-            if(codeMap.containsKey(key)){
+            if (codeMap.containsKey(key)) {
                 View view = codeMap.get(key);
-                updateText(data,view);
-            }else{
+                updateText(data, view);
+            } else {
                 addViewItem(data);
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG,"获取money_round失败"+data.toString());
-            Log.w(LOG_TAG,e);
+            Log.e(LOG_TAG, "获取money_round失败" + data.toString());
+            Log.w(LOG_TAG, e);
         }
     }
 
-    private void updateText(JSONObject data,View view) throws JSONException {
+    private void updateText(JSONObject data, View view) throws JSONException {
         String type = data.getString("pay_type");
         TextView textView = null;
-        if(QrCodeData.NAME_ALI.equals(type)){
-             textView = view.findViewById(R.id.qr_zfb_num);
+        if (QrCodeData.NAME_ALI.equals(type)) {
+            textView = view.findViewById(R.id.qr_zfb_num);
 
-        }else if(QrCodeData.NAME_WX.equals(type)) {
+        } else if (QrCodeData.NAME_WX.equals(type)) {
             textView = view.findViewById(R.id.qr_wx_num);
         }
-        int num=0;
-        if(data.has("count")){
+        int num = 0;
+        if (data.has("count")) {
             num = data.getInt("count");
-        }else{
+        } else {
             String numStr = textView.getText().toString();
-            num = Integer.parseInt(numStr)+1;
+            num = Integer.parseInt(numStr) + 1;
         }
-        textView.setText(num+"");
+        textView.setText(num + "");
     }
 }

@@ -19,27 +19,37 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhiyi.onepay.util.RequestUtils;
+import com.zhiyi.onepay.util.ToastUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MerchantActivity extends AppCompatActivity implements Handler.Callback{
+import java.io.IOException;
+
+public class MerchantActivity extends AppCompatActivity{
     private Button btn_copy;
     private Button btn_reset;
+    private Button btn_unite;
     private TextView txt_Merchant;
     private TextView txt_Secret;
     private String merchantId;
     private String Secret;
+    private Handler uiHandler;
+    private TextView txt_uniteId;
+    private Button btn_admin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uiHandler = new Handler();
         setContentView(R.layout.activity_merchant);
-        btn_copy = findViewById(R.id.button_copy);
-        btn_reset = findViewById(R.id.button_reset);
-        txt_Merchant = findViewById(R.id.merchant_id);
-        txt_Secret = findViewById(R.id.merchant_secret);
-
+        btn_copy = (Button) findViewById(R.id.button_copy);
+        btn_reset = (Button)findViewById(R.id.button_reset);
+        btn_unite = (Button)findViewById(R.id.button_unite);
+        btn_admin = (Button)findViewById(R.id.button_admin);
+        txt_Merchant = (TextView) findViewById(R.id.merchant_id);
+        txt_Secret = (TextView) findViewById(R.id.merchant_secret);
+        txt_uniteId =(TextView)  findViewById(R.id.text_unite);
         btn_copy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,13 +64,77 @@ public class MerchantActivity extends AppCompatActivity implements Handler.Callb
                         setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/resetSecret"),new Handler(MerchantActivity.this),2);
+                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/resetSecret"),new IHttpResponse(){
+
+                            @Override
+                            public void OnHttpData(String data) {
+                                handleMessage(data);
+                            }
+
+                            @Override
+                            public void OnHttpDataError(IOException e) {
+
+                            }
+                        });
+
                     }
                 }).show();
                 dialog.setCancelable(true);
             }
         });
-        RequestUtils.getRequest(AppConst.authUrl("person/merchant/getMerchant"),new Handler(this),1);
+        btn_unite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String uniteId = txt_uniteId.getText().toString();
+                if(merchantId.equals(uniteId)){
+                    ToastUtil.show(MerchantActivity.this,"目标商户ID是自己");
+                    return;
+                }
+                AlertDialog  dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("关联之后.本商户将注销,不再独立收款,确定要关联吗?").setIcon(R.drawable.icon).
+                        setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/bind/unite/"+merchantId),new IHttpResponse(){
+
+                            @Override
+                            public void OnHttpData(String data) {
+                                handleMessage(data);
+                            }
+
+                            @Override
+                            public void OnHttpDataError(IOException e) {
+
+                            }
+                        });
+
+                    }
+                }).show();
+                dialog.setCancelable(true);
+            }
+        });
+
+        btn_admin.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setData(Uri.parse(AppConst.HostUrl+"app/start/index.html#/token="+AppConst.Token+"/appid="+AppConst.AppId));//Url 就是你要打开的网址
+                intent.setAction(Intent.ACTION_VIEW);
+                startActivity(intent); //启动浏览器
+            }
+        });
+
+        RequestUtils.getRequest(AppConst.authUrl("person/merchant/getMerchant"),new IHttpResponse(){
+
+            @Override
+            public void OnHttpData(String data) {
+                handleMessage(data);
+            }
+
+            @Override
+            public void OnHttpDataError(IOException e) {
+
+            }
+        });
     }
 
     private void copySecret(){
@@ -70,35 +144,52 @@ public class MerchantActivity extends AppCompatActivity implements Handler.Callb
         Toast.makeText(this, "复制成功", Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public boolean handleMessage(Message message) {
-        int what = message.what;
-        if (what == AppConst.MT_Net_Response) {
-            if (message.obj == null) {
-                return true;
+    public void regist(){
+
+    }
+
+    private void handleMessage(String message) {
+            if (message == null||message.isEmpty()) {
+                return;
             }
-            String msg = message.obj.toString();
-            Log.i("ZYKJ", msg);
+            Log.i("ZYKJ", message);
 
             JSONObject json;
             try {
-                json = new JSONObject(msg);
-                if (json.getInt("code") == 0) {
+                json = new JSONObject(message);
+                int code = json.getInt("code");
+                if (code == 0) {
                     json = json.getJSONObject("data");
                     merchantId = json.getString("merchantid");
                     Secret = json.getString("secret");
-                    txt_Merchant.setText(merchantId);
-                    txt_Secret.setText(Secret);
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            txt_Merchant.setText(merchantId);
+                            txt_Secret.setText(Secret);
+                        }
+                    };
+                    uiHandler.post(runnable);
+
                 } else {
                     String emsg = json.getString("msg");
                     Log.w("ZYKJ", emsg);
-                    Toast.makeText(this, emsg, Toast.LENGTH_LONG).show();
+                    ToastUtil.show(this, emsg);
+                    if(code == 99) {
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                btn_copy.setEnabled(false);
+                                btn_reset.setEnabled(false);
+                                btn_unite.setEnabled(false);
+                            }
+                        };
+                        uiHandler.post(runnable);
+                    }
                 }
 
             } catch (JSONException e) {
                 Log.w("ZYKJ", e);
             }
-        }
-        return true;
     }
 }

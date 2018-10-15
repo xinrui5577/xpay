@@ -5,10 +5,6 @@
 
 package com.zhiyi.onepay;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,7 +19,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,26 +39,22 @@ public class MainActivity extends AppCompatActivity {
 
     private Switch swt_fuwu;
     private Switch swt_service;
-    private Switch swt_log;
     private Button btn_qrcode;
     private Button btn_merchant;
+    private Button btn_log;
+    private TextView textView;
     private DBManager dbm;
-    private TextView logView;
 
-    private boolean enableLog;
     private Handler handler;
 
 
-    private NotificationChannel mNotificationChannel;
+//    private NotificationChannel mNotificationChannel;
 
     private MainService service;
     private IMessageHander msgHander = new IMessageHander() {
         @Override
         public void handMessage(Message msg) {
             Log.i(LogTag,msg.obj.toString());
-            if(enableLog){
-                appendLog(msg.obj.toString());
-            }
         }
     };
     private ServiceConnection conn = new ServiceConnection() {
@@ -82,17 +73,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //不知到什么原因.广播收不到
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Uri uri = intent.getData();
-            Log.i(LogTag,"broadcast"+uri.toString());
-            String path = uri.getPath();
-            if("log".equals(path)){
-                appendLog(uri.toString());
-            }
-        }
-    };
+    private BroadcastReceiver receiver = new BootRecevier() ;
 
 
     public MainActivity() {
@@ -103,22 +84,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        swt_fuwu = findViewById(R.id.p1);
-        swt_service = findViewById(R.id.service);
-        swt_log = findViewById(R.id.log);
+        swt_fuwu = (Switch)findViewById(R.id.p1);
+        swt_service = (Switch)findViewById(R.id.service);
 
-        btn_qrcode = findViewById(R.id.btn_qrcode);
-        btn_merchant = findViewById(R.id.btn_merchant);
+        btn_qrcode = (Button) findViewById(R.id.btn_qrcode);
+        btn_merchant = (Button)findViewById(R.id.btn_merchant);
+        btn_log = (Button)findViewById(R.id.btn_log);
 
-        logView = findViewById(R.id.text_log);
         swt_service.setChecked(false);
         handler = new Handler();
-        sb = new StringBuilder(1200);
 
+        textView = (TextView)findViewById(R.id.textView_Help);
         dbm = new DBManager(this);
-        String log = dbm.getConfig(AppConst.KeyBoolLog);
-        enableLog = TRUE.equals(log);
-        swt_log.setChecked(enableLog);
 
         try {
             AppConst.version = getPackageManager().getPackageInfo(getPackageName(),0).versionCode;
@@ -147,25 +124,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        swt_log.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(enableLog!=isChecked) {
-                    enableLog = isChecked;
-                    if(enableLog){
-                        sendNotice();
-                    }
-                    dbm.setConfig(AppConst.KeyBoolLog, enableLog ? TRUE : FALSE);
-                    sb.delete(0,sb.length());
-                    logView.setText("");
-                }
-            }
-        });
 
         btn_qrcode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openQrcode();
+            }
+        });
+        btn_log.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, LogActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        textView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                    Intent intent = new Intent();
+                    intent.setData(Uri.parse(AppConst.HostUrl+"help.html"));//Url 就是你要打开的网址
+                    intent.setAction(Intent.ACTION_VIEW);
+                    startActivity(intent); //启动浏览器
             }
         });
 
@@ -179,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                  }
         );
 
-        Button btn_order = findViewById(R.id.btn_order);
+        Button btn_order = (Button)findViewById(R.id.btn_order);
         btn_order.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -208,21 +188,16 @@ public class MainActivity extends AppCompatActivity {
         swt_fuwu.setChecked(enabled);
         if(!enabled){
             swt_service.setEnabled(false);
-            swt_log.setEnabled(false);
-            appendLog("权限未开启");
             return;
         }
         swt_service.setEnabled(true);
-        swt_log.setEnabled(true);
         //开启服务
         ComponentName name = startService(new Intent(this, NotificationMonitorService.class));
         if(name ==null) {
             swt_service.setChecked(false);
             Toast.makeText(getApplicationContext(), "服务开启失败", Toast.LENGTH_LONG).show();
-            appendLog("服务开启失败");
             return;
         }
-        appendLog("服务开启成功");
 
         toggleNotificationListenerService();
         swt_service.setChecked(true);
@@ -230,26 +205,7 @@ public class MainActivity extends AppCompatActivity {
         //微信支付宝开启
 
     }
-    private StringBuilder sb;
-    private void appendLog(String log){
-        if(enableLog){
-            if(sb.length()>1000){
-                sb = new StringBuilder(1200);
-                sb.append("清理日志\n");
-            }
-            sb.append(log+"\n");
-            handler.post(runnableUi);
-        }
-    }
 
-    Runnable   runnableUi=new  Runnable(){
-        @Override
-        public void run() {
-            //更新界面
-            logView.setText(sb.toString());
-        }
-
-    };
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -290,26 +246,26 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void sendNotice(){
-        Log.i("ZYKJ","MainActivity Send Notice");
-        NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_Test, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
-            mNotificationChannel.setDescription("个人支付的监控");
-            mNM.createNotificationChannel(mNotificationChannel);
-            Log.i("ZYKJ","MainActivity create mNotificationChannel");
-        }
-        Notification notification = new NotificationCompat.Builder(this,AppConst.CHANNEL_Test)
-                .setContentTitle("通知监控").setContentText("测试号通过扫码向你付款0.01元").setSmallIcon(R.mipmap.ic_launcher)
-                .setWhen(System.currentTimeMillis()).setChannel(AppConst.CHANNEL_Test).build();
-
-        /**
-         * 注意,我们使用出来。incoming_message ID 通知。它可以是任何整数,但我们使用 资源id字符串相关
-         * 通知。它将永远是一个独特的号码在你的 应用程序。
-         */
-        mNM.notify(2,notification);
-        Log.i("ZYKJ","MainActivity Send Notice Comp");
-    }
+//    private void sendNotice(){
+//        Log.i("ZYKJ","MainActivity Send Notice");
+//        NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//            mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_Test, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
+//            mNotificationChannel.setDescription("个人支付的监控");
+//            mNM.createNotificationChannel(mNotificationChannel);
+//            Log.i("ZYKJ","MainActivity create mNotificationChannel");
+//        }
+//        Notification notification = new NotificationCompat.Builder(this,AppConst.CHANNEL_Test)
+//                .setContentTitle("通知监控").setContentText("测试号通过扫码向你付款0.01元").setSmallIcon(R.mipmap.ic_launcher)
+//                .setWhen(System.currentTimeMillis()).setChannelId(AppConst.CHANNEL_Test).build();
+//
+//        /**
+//         * 注意,我们使用出来。incoming_message ID 通知。它可以是任何整数,但我们使用 资源id字符串相关
+//         * 通知。它将永远是一个独特的号码在你的 应用程序。
+//         */
+//        mNM.notify(2,notification);
+//        Log.i("ZYKJ","MainActivity Send Notice Comp");
+//    }
 
     private void toggleNotificationListenerService()
     {
