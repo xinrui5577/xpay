@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     dbManager.setConfig(AppConst.KeyAppId,AppConst.AppId+"");
-                                    mAppIdView.setText(AppConst.AppId);
+                                    mAppIdView.setText(""+AppConst.AppId);
                                 }
                             };
                             handler.post(runnable);

@@ -4,53 +4,57 @@
     android:layout_height="match_parent"
     android:background="#0099cc"
     tools:context="com.zhiyi.onepay.QrcodeActivity">
-
-    <TextView
-        android:id="@+id/fullscreen_content"
+    <!-- Login progress -->
+    <ProgressBar
+    android:id="@+id/login_progress"
+    style="?android:attr/progressBarStyleLarge"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:visibility="gone" />
+    <ScrollView
+        android:id="@+id/main_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="45sp"
-        android:textStyle="bold" />
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black_overlay"
-            android:orientation="vertical"
-            tools:ignore="UselessParent">
-        </LinearLayout>
-    </FrameLayout>
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+            android:orientation="vertical" >
 
-        <LinearLayout
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            <TextView
+                android:id="@+id/fullscreen_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:keepScreenOn="true"
+                android:paddingBottom="50dp"
+                android:paddingTop="50dp"
+                android:text="@string/dummy_content"
+                android:textColor="#33b5e5"
+                android:textSize="45sp"
+                android:textStyle="bold" />
 
+            <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black_overlay"
+                android:orientation="vertical"
+                android:paddingBottom="10dp"
+                tools:ignore="UselessParent">
+
+
+            </LinearLayout>
             <Button
                 android:id="@+id/dummy_button"
                 style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/dummy_button" />
+
         </LinearLayout>
-    </FrameLayout>
+    </ScrollView>
 
 </FrameLayout>

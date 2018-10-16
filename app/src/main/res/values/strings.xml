@@ -37,5 +37,5 @@
     <string name="dummy_content">没有可用二维码\n请添加二维码</string>
     <string name="title_activity_merchant">商户密钥</string>
     <string name="action_settings">Settings</string>
-
+    <string name="title_activity_qrcode_upload">二维码上传</string>
 </resources>

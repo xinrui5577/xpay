@@ -1,18 +1,14 @@
 package com.zhiyi.onepay;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -20,10 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.zxing.Result;
-import com.google.zxing.decode.BitmapDecoder;
-import com.qcloud.image.ImageClient;
-import com.qcloud.image.request.GeneralOcrRequest;
 import com.zhiyi.onepay.data.QrCodeData;
 import com.zhiyi.onepay.util.RequestUtils;
 import com.zhiyi.onepay.util.SystemProgramUtils;
@@ -33,11 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -51,13 +40,14 @@ public class QrcodeActivity extends AppCompatActivity {
 
 
     private final int PICK_CODE = 2;
+    private final int UPLOAD = 3;
 
     private static String LOG_TAG = "ZYKJ";
 
     private View mContentView;
     private LinearLayout container;
 
-    private ImageClient imageClient;
+
     private Handler handler;
 
 
@@ -75,7 +65,6 @@ public class QrcodeActivity extends AppCompatActivity {
 
         container = (LinearLayout)findViewById(R.id.container);
         mContentView = findViewById(R.id.fullscreen_content);
-
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(readClick);
         handler = new Handler();
@@ -107,14 +96,16 @@ public class QrcodeActivity extends AppCompatActivity {
 //        intent.setType("image/*");//设置需要从系统选择的内容：图片
 //        //intent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);//设置输出位置
 //        startActivityForResult(intent, PICK_CODE);
-
         SystemProgramUtils.zhaopian(this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (intent == null) {
+            return;
+        }
         if (requestCode == PICK_CODE) {
-            if (intent != null) {
                 Uri uri = intent.getData();
                 if (uri == null) {
                     Toast.makeText(this, "目标数据为空", Toast.LENGTH_LONG);
@@ -133,48 +124,34 @@ public class QrcodeActivity extends AppCompatActivity {
                 }
                 String currentPhotoString = cursor.getString(idx);
                 cursor.close();
-//                Bitmap bitmap = resizePhono(currentPhotoString);
-                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoString);
-                if (bitmap == null) {
-                    Log.w(LOG_TAG, "bitmap is null" + currentPhotoString);
-                    String[] mPermissionList = new String[]{
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE};
-                    ActivityCompat.requestPermissions(this, mPermissionList, 100);
-                    return;
-                }
-                BitmapDecoder decoder = new BitmapDecoder(this);
-                Result rs = decoder.getRawResult(bitmap);
-                if (rs != null) {
-                    String txt = rs.getText();
-                    Log.w(LOG_TAG, txt);
-                    if (txt != null) {
-                        readTxt(currentPhotoString, txt);
 
-                    }
-                }
-            }
+                Intent qIntent = new Intent(QrcodeActivity.this,QrcodeUploadActivity.class);
+                qIntent.putExtra("file",currentPhotoString);
+                startActivityForResult(qIntent,UPLOAD);
+//                Bitmap bitmap = resizePhono(currentPhotoString);
+        }else if(requestCode == UPLOAD) {
+            String msg = intent.getStringExtra("result");
+            handleMessage(msg, ARG_TYPE_ADD);
         }
-        super.onActivityResult(requestCode, resultCode, intent);
     }
 
     /**
      * 压缩图片
      */
-    private Bitmap resizePhono(String currentPhotoString) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;//仅仅加载图片
-        BitmapFactory.decodeFile(currentPhotoString, options);
-        if (options.outWidth < 1) {
-            Log.w(LOG_TAG, "image not read" + currentPhotoString);
-            return null;
-        }
-        double radio = Math.max(options.outWidth * 1.0d / 1024f, options.outHeight * 1.0d / 1024f);
-        options.inSampleSize = (int) Math.ceil(radio);
-        options.inJustDecodeBounds = false;
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        return BitmapFactory.decodeFile(currentPhotoString, options);
-    }
+//    private Bitmap resizePhono(String currentPhotoString) {
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inJustDecodeBounds = true;//仅仅加载图片
+//        BitmapFactory.decodeFile(currentPhotoString, options);
+//        if (options.outWidth < 1) {
+//            Log.w(LOG_TAG, "image not read" + currentPhotoString);
+//            return null;
+//        }
+//        double radio = Math.max(options.outWidth * 1.0d / 1024f, options.outHeight * 1.0d / 1024f);
+//        options.inSampleSize = (int) Math.ceil(radio);
+//        options.inJustDecodeBounds = false;
+//        options.inPreferredConfig = Bitmap.Config.RGB_565;
+//        return BitmapFactory.decodeFile(currentPhotoString, options);
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -194,125 +171,7 @@ public class QrcodeActivity extends AppCompatActivity {
 
 //    private ImageClient imageClient;
 
-    private void readTxt(final String file, final String url) {
-        final int type;
-        if (url.toUpperCase().startsWith("WXP://")) {
-            type = QrCodeData.TYPE_WX;
-        } else if (url.toUpperCase().startsWith("HTTPS://QR.ALIPAY.COM")) {
-            type = QrCodeData.TYPE_ALI;
-        } else {
-            Log.w(LOG_TAG, "qrcode is not enable");
-            Toast.makeText(this, "不支持选择的二维码,请选择支付宝/微信收款码", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        // Android 4.0 之后不能在主线程中请求HTTP请求
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
 
-                String bucketName = "qrcode-1252008836";
-                if (imageClient == null) {
-                    String appId = "1252008836";
-                    String secretId = "AKIDUJ5ZBdw7MivIfx7C82mLFe9aEiJksLxX";
-                    String secretKey = "BB0ra9oOEwcOaeXdbTAg4LRMXouqgT6Y";
-                    imageClient = new ImageClient(appId, secretId, secretKey, ImageClient.NEW_DOMAIN_recognition_image_myqcloud_com);
-                }
-                File tagImage;
-                try {
-                    tagImage = new File(file);
-                } catch (Exception ex) {
-                    Log.w(LOG_TAG, ex);
-                    return;
-                }
-
-                GeneralOcrRequest tagReq = new GeneralOcrRequest(bucketName, tagImage);
-
-                String ret = imageClient.generalOcr(tagReq);
-
-
-                QrCodeData qrData = new QrCodeData();
-                qrData.money = "0";
-                qrData.name = "";
-                try {
-                    JSONObject jsonObject = new JSONObject(ret);
-                    int code = jsonObject.getInt("code");
-                    if (code != 0) {
-                        Log.w(LOG_TAG, "image ORC code is " + code);
-                        Log.w(LOG_TAG, ret);
-                        return;
-                    }
-                    if (!jsonObject.has("data")) {
-                        Log.w(LOG_TAG, "image ORC no data ");
-                        return;
-                    }
-                    JSONArray array = jsonObject.getJSONObject("data").getJSONArray("items");
-                    if (array == null) {
-                        Log.w(LOG_TAG, "image ORC no items ");
-                        return;
-                    }
-                    Pattern pMoney = Pattern.compile("￥([\\d\\.]+)");
-                    if (type == QrCodeData.TYPE_WX) {
-                        Pattern pWeixinNick = Pattern.compile("(\\S+)\\(\\*");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject item = array.getJSONObject(i);
-                            if (item.has("itemstring")) {
-                                String value = item.getString("itemstring");
-                                Matcher m = pMoney.matcher(value);
-                                if (m.find()) {
-                                    qrData.money = m.group(1);
-                                    continue;
-                                }
-                                m = pWeixinNick.matcher(value);
-                                if (m.find()) {
-                                    qrData.name = m.group(1);
-                                    continue;
-                                }
-                            }
-                        }
-                    } else if (type == QrCodeData.TYPE_ALI) {
-                        Pattern aliNick = Pattern.compile("支付宝|LIPAY");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject item = array.getJSONObject(i);
-                            if (item.has("itemstring")) {
-                                String value = item.getString("itemstring");
-                                Matcher m = pMoney.matcher(value);
-                                if (m.find()) {
-                                    qrData.money = m.group(1);
-                                    continue;
-                                }
-                                m = aliNick.matcher(value);
-                                if (m.find()) {
-                                    continue;
-                                } else {
-                                    qrData.name = value;
-                                }
-                            }
-                        }
-                    }
-                    if (!qrData.name.matches("^\\S+$")) {
-                        qrData.name = "";
-                    }
-                    qrData.type = type;
-                } catch (JSONException e) {
-                    Log.w(LOG_TAG, e);
-                }
-
-                Log.i(LOG_TAG, qrData.money + qrData.name);
-                RequestUtils.getRequest(AppConst.authUrl("person/qrcode/upload") + "&money=" + qrData.money + "&name=" + qrData.name + "&code=" + url, new IHttpResponse() {
-                    @Override
-                    public void OnHttpData(String data) {
-                        handleMessage(data, ARG_TYPE_ADD);
-                    }
-
-                    @Override
-                    public void OnHttpDataError(IOException e) {
-
-                    }
-                });
-
-            }
-        }).start();
-    }
 
     private HashMap<String, View> codeMap = new HashMap<>();
 
@@ -360,6 +219,10 @@ public class QrcodeActivity extends AppCompatActivity {
                 }
                 if (codeMap.size() > 0) {
                     mContentView.setVisibility(View.INVISIBLE);
+                    LinearLayout p = (LinearLayout) mContentView.getParent();
+                    if(p!=null) {
+                        p.removeView(mContentView);
+                    }
                 }
             }
         };

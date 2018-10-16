@@ -41,18 +41,20 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" >
-        <intent-filter>
-            <action android:name="com.zhiyikeji.Notification" />
-        </intent-filter>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="com.zhiyikeji.Notification" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
             android:theme="@android:style/Theme.Translucent" />
+
         <receiver
             android:name=".BootRecevier"
             android:enabled="true"
@@ -72,7 +74,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <service
@@ -100,7 +102,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_qrcode"
             android:theme="@style/FullscreenTheme" />
-        <activity android:name=".MerchantActivity"></activity>
+        <activity android:name=".MerchantActivity" />
+        <activity
+            android:name=".QrcodeUploadActivity"
+            android:label="@string/title_activity_qrcode_upload"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

@@ -94,7 +94,7 @@ public class MerchantActivity extends AppCompatActivity{
                         setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/bind/unite/"+merchantId),new IHttpResponse(){
+                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/bind")+"&unite="+uniteId,new IHttpResponse(){
 
                             @Override
                             public void OnHttpData(String data) {

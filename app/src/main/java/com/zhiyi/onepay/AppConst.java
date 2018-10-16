@@ -24,6 +24,8 @@ public class AppConst {
     public static String Token="";
     public static String Secret="";
 
+    public static final String TAG_LOG = "ZYKJ";
+
     public static final String IntentAction = "com.zhiyikeji.Notification";
 
     public static final int MT_Net_Response = 1;

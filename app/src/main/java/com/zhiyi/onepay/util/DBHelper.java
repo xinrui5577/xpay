@@ -18,7 +18,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper{
 	private static DBHelper sInstance;
 	public DBHelper(Context context) {  
-        super(context, "zykj.db", null, 1);
+        super(context, "zykj.db", null, 2);
     }
 
 	@Override
@@ -32,6 +32,10 @@ public class DBHelper extends SQLiteOpenHelper{
  
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if(newVersion==2){
+			String sql = "CREATE TABLE IF NOT EXISTS ukafu_log(id integer primary key autoincrement,log_value varchar(512),log_type int(11),create_dt varchar(20))";
+			db.execSQL(sql);
+		}
 	}
 
 	public static DBHelper getInstance(Context context) {
