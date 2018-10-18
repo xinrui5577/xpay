@@ -11,6 +11,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -23,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.zhiyi.onepay.components.BatteryReceiver;
 import com.zhiyi.onepay.util.AppUtil;
 import com.zhiyi.onepay.util.DBManager;
 import com.zhiyi.onepay.util.RequestUtils;
@@ -102,6 +104,11 @@ public class NotificationMonitorService extends NotificationListenerService impl
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getCanonicalName());
             wakeLock.acquire();
         }
+
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        BatteryReceiver batteryReceiver = new BatteryReceiver();
+        registerReceiver(batteryReceiver, intentFilter);
+
         Log.i("ZYKJ","Notification Monitor Service started");
     }
 
@@ -243,7 +250,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
      *
      */
     public void postState() {
-		RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&version=" + AppConst.version, new IHttpResponse() {
+		RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&v=" + AppConst.version+"&b="+AppConst.Battery, new IHttpResponse() {
             @Override
             public void OnHttpData(String data) {
                 handleMessage(data,3);

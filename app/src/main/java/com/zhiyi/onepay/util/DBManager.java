@@ -60,7 +60,7 @@ public class DBManager {
         ContentValues values = new ContentValues();
         values.put("log_value",log);
         values.put("log_type",type);
-        SimpleDateFormat sd = new SimpleDateFormat("yy MM dd hh:mm:ss");
+        SimpleDateFormat sd = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
         values.put("create_dt",sd.format(new Date(System.currentTimeMillis())));
         return db.insert(tableaName+"_log",null,values);
     }
