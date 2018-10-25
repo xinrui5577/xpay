@@ -50,6 +50,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     private PowerManager.WakeLock wakeLock;
     private DBManager dbManager;
 
+
     public void onCreate() {
         super.onCreate();
         Log.i("ZYKJ", "Notification posted ");
@@ -64,24 +65,24 @@ public class NotificationMonitorService extends NotificationListenerService impl
         payRecv = MediaPlayer.create(this, R.raw.payrecv);
         payNetWorkError = MediaPlayer.create(this, R.raw.networkerror);
         dbManager = new DBManager(this);
-        if(AppConst.AppId<1){
+        if (AppConst.AppId < 1) {
             String appid = dbManager.getConfig(AppConst.KeyAppId);
-            if(!TextUtils.isEmpty(appid)){
+            if (!TextUtils.isEmpty(appid)) {
                 AppConst.AppId = Integer.parseInt(appid);
                 String token = dbManager.getConfig(AppConst.KeyToken);
-                if(!TextUtils.isEmpty(token)){
+                if (!TextUtils.isEmpty(token)) {
                     AppConst.Token = token;
                 }
                 String secret = dbManager.getConfig(AppConst.KeySecret);
-                if(!TextUtils.isEmpty(secret)){
+                if (!TextUtils.isEmpty(secret)) {
                     AppConst.Secret = secret;
                 }
             }
         }
         new Thread(this).start();
-        Log.i("ZYKJ","Notification Monitor Service start");
-        NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mNM!=null){
+        Log.i("ZYKJ", "Notification Monitor Service start");
+        NotificationManager mNM = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mNM != null) {
             NotificationChannel mNotificationChannel = mNM.getNotificationChannel(AppConst.CHANNEL_ID);
             if (mNotificationChannel == null) {
                 mNotificationChannel = new NotificationChannel(AppConst.CHANNEL_ID, "pxapy", NotificationManager.IMPORTANCE_DEFAULT);
@@ -89,7 +90,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 mNM.createNotificationChannel(mNotificationChannel);
             }
         }
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,AppConst.CHANNEL_ID);//
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this, AppConst.CHANNEL_ID);//
 
         nb.setContentTitle("PXPAY个人支付").setTicker("PXPAY个人支付").setSmallIcon(R.drawable.icon);
         nb.setContentText("个人支付运行中.请保持此通知一直存在");
@@ -100,7 +101,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         //保持cpu一直运行，不管屏幕是否黑屏
-        if(pm!=null && wakeLock == null) {
+        if (pm != null && wakeLock == null) {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getCanonicalName());
             wakeLock.acquire();
         }
@@ -109,12 +110,12 @@ public class NotificationMonitorService extends NotificationListenerService impl
         BatteryReceiver batteryReceiver = new BatteryReceiver();
         registerReceiver(batteryReceiver, intentFilter);
 
-        Log.i("ZYKJ","Notification Monitor Service started");
+        Log.i("ZYKJ", "Notification Monitor Service started");
     }
 
 
     public void onDestroy() {
-        if(wakeLock!=null){
+        if (wakeLock != null) {
             wakeLock.release();
             wakeLock = null;
         }
@@ -150,13 +151,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 String uname = m.group(1);
                 String money = m.group(2);
                 postMethod(AliPay, money, uname);
-            } else{
-               m = pAlipay2.matcher(text);
+            } else {
+                m = pAlipay2.matcher(text);
                 if (m.find()) {
                     String money = m.group(1);
                     postMethod(AliPay, money, "支付宝用户");
-                }else{
-                    Log.w("ZYKJ","匹配失败"+text);
+                } else {
+                    Log.w("ZYKJ", "匹配失败" + text);
                 }
             }
         }
@@ -176,20 +177,23 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     @Override
     public void run() {
-        while(true){
+        while (true) {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                Log.e("ZYKJ","service thread",e);
+                Log.e("ZYKJ", "service thread", e);
             }
             //发送在线通知,保持让系统时时刻刻直到app在线
             postState();
+            if (System.currentTimeMillis() - lastNetTime > 20000) {
+                playMedia(payNetWorkError);
+            }
         }
     }
 
 
     public void onNotificationRemoved(StatusBarNotification paramStatusBarNotification) {
-        if(Build.VERSION.SDK_INT>=19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             Bundle localObject = paramStatusBarNotification.getNotification().extras;
             String pkgName = paramStatusBarNotification.getPackageName();
             String title = localObject.getString("android.title");
@@ -205,18 +209,18 @@ public class NotificationMonitorService extends NotificationListenerService impl
     /**
      * 获取道的支付通知发送到服务器
      *
-     * @param payType 支付方式
-     * @param money 支付金额
+     * @param payType  支付方式
+     * @param money    支付金额
      * @param username 支付者名字
      */
-    public void postMethod(final String payType,final String money,final String username) {
+    public void postMethod(final String payType, final String money, final String username) {
 //		Uri u = new Uri.Builder().path("pay").appendQueryParameter("type", payType)
 //				.appendQueryParameter("money", money).appendQueryParameter("uname", username).build();
 //		Intent intent = new Intent("notify",u);
 //		sendBroadcast(intent);
 //		String sec = "sec";
-        dbManager.addLog("new order:"+payType+","+money+","+username,101);
-        payRecv.start();
+        dbManager.addLog("new order:" + payType + "," + money + "," + username, 101);
+        playMedia(payRecv);
         String app_id = "" + AppConst.AppId;
         String rndStr = AppUtil.randString(16);
         long time = System.currentTimeMillis() / 1000;
@@ -233,13 +237,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 , new IHttpResponse() {
                     @Override
                     public void OnHttpData(String data) {
-                        dbManager.addLog(data,200);
-                        handleMessage(data,1);
+                        dbManager.addLog(data, 200);
+                        handleMessage(data, 1);
                     }
 
                     @Override
                     public void OnHttpDataError(IOException e) {
-                        dbManager.addLog("http error,"+payType+","+money+","+username+":"+e.getMessage(),500);
+                        dbManager.addLog("http error," + payType + "," + money + "," + username + ":" + e.getMessage(), 500);
                     }
                 });
 
@@ -247,51 +251,60 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     /**
      * 发送错误信息到服务器
-     *
      */
     public void postState() {
-		RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&v=" + AppConst.version+"&b="+AppConst.Battery, new IHttpResponse() {
+        RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&v=" + AppConst.version + "&b=" + AppConst.Battery, new IHttpResponse() {
             @Override
             public void OnHttpData(String data) {
-                handleMessage(data,3);
+                handleMessage(data, 3);
             }
 
             @Override
             public void OnHttpDataError(IOException e) {
-                payNetWorkError.start();
+
             }
         });
     }
 
-    public boolean handleMessage(String message,int arg1) {
-            if (message == null||message.isEmpty()) {
-                return true;
-            }
-            if(arg1 == 3){
-                return true;
-            }
-            String msg = message;
-            Log.i("ZYKJ", msg);
-            //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
+    private long lastNetTime;
+
+    public boolean handleMessage(String message, int arg1) {
+        lastNetTime = System.currentTimeMillis();
+        if (message == null || message.isEmpty()) {
+            return true;
+        }
+        if (arg1 == 3) {
+
+            return true;
+        }
+        String msg = message;
+        Log.i("ZYKJ", msg);
+        //发送通知的这个还有问题.接受不到,第一次写安卓,很多坑还不懂,求帮助
 //            Intent intent = new Intent(NotificationMonitorService.this,MainActivity.class);
 //            intent.setAction(AppConst.IntentAction);
 //            Uri uri = new Uri.Builder().scheme("app").path("pay").query("msg=支付完成&moeny=" + message.obj.toString()).build();
 //            intent.setData(uri);
 //            sendBroadcast(intent);
-            JSONObject json;
-            try {
-                json = new JSONObject(msg);
-                if (json.getInt("code") == 0) {
-                    payComp.start();
-                } else {
-                    String emsg = json.getString("msg");
-                    Log.w("ZYKJ", emsg);
-                }
-
-            } catch (JSONException e) {
-                Log.w("ZYKJ", e);
+        JSONObject json;
+        try {
+            json = new JSONObject(msg);
+            if (json.getInt("code") == 0) {
+                playMedia(payComp);
+            } else {
+                String emsg = json.getString("msg");
+                Log.w("ZYKJ", emsg);
             }
 
+        } catch (JSONException e) {
+            Log.w("ZYKJ", e);
+        }
+
         return true;
+    }
+
+    private void playMedia(MediaPlayer media) {
+        if (AppConst.PlaySounds) {
+            media.start();
+        }
     }
 }

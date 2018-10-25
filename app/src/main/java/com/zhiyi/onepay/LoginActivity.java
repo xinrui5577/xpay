@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
         if(appUnid!=null){
             showProgress(true);
 
-            String sign= AppUtil.toMD5("zhiyikeji"+appUnid);
+            String sign= AppUtil.toMD5("zhiyikeji"+appUnid+BuildConst.Secret);
             RequestUtils.getRequest(AppConst.HostUrl + "person/api/getAppId/unid/" + appUnid + "/sign/" + sign, new IHttpResponse() {
                 @Override
                 public void OnHttpData(String rs) {
@@ -128,13 +128,20 @@ public class LoginActivity extends AppCompatActivity {
                         if(json.getInt("code")==0){
                             JSONObject data = json.getJSONObject("data");
                             String appId = data.getString("appid");
+                            if(data.has("token")){
+                                AppConst.Token = data.getString("appid");
+                            }
                             AppConst.AppId = Integer.parseInt(appId);
-
                             Runnable runnable = new Runnable() {
                                 @Override
                                 public void run() {
-                                    dbManager.setConfig(AppConst.KeyAppId,AppConst.AppId+"");
-                                    mAppIdView.setText(""+AppConst.AppId);
+                                dbManager.setConfig(AppConst.KeyAppId,AppConst.AppId+"");
+                                mAppIdView.setText(""+AppConst.AppId);
+                                if(AppConst.Token!=null && !AppConst.Token.isEmpty()){
+                                    dbManager.setConfig(AppConst.KeyToken,AppConst.Token);
+                                    mTokenView.setText(AppConst.Token);
+                                    attemptLogin();
+                                }
                                 }
                             };
                             handler.post(runnable);

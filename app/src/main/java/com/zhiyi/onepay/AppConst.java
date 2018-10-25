@@ -22,6 +22,8 @@ public class AppConst {
 
     public static int Battery=0;
 
+    public static boolean PlaySounds = true;
+
     public static int AppId=0;
     public static String Token="";
     public static String Secret="";

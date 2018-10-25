@@ -26,7 +26,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-public class MerchantActivity extends AppCompatActivity{
+public class MerchantActivity extends AppCompatActivity {
     private Button btn_copy;
     private Button btn_reset;
     private Button btn_unite;
@@ -44,12 +44,12 @@ public class MerchantActivity extends AppCompatActivity{
         uiHandler = new Handler();
         setContentView(R.layout.activity_merchant);
         btn_copy = (Button) findViewById(R.id.button_copy);
-        btn_reset = (Button)findViewById(R.id.button_reset);
-        btn_unite = (Button)findViewById(R.id.button_unite);
-        btn_admin = (Button)findViewById(R.id.button_admin);
+        btn_reset = (Button) findViewById(R.id.button_reset);
+        btn_unite = (Button) findViewById(R.id.button_unite);
+        btn_admin = (Button) findViewById(R.id.button_admin);
         txt_Merchant = (TextView) findViewById(R.id.merchant_id);
         txt_Secret = (TextView) findViewById(R.id.merchant_secret);
-        txt_uniteId =(TextView)  findViewById(R.id.text_unite);
+        txt_uniteId = (TextView) findViewById(R.id.text_unite);
         btn_copy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,25 +60,25 @@ public class MerchantActivity extends AppCompatActivity{
         btn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog  dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("确定要重置?").setIcon(R.drawable.icon).
+                AlertDialog dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("确定要重置?").setIcon(R.drawable.icon).
                         setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/resetSecret"),new IHttpResponse(){
-
                             @Override
-                            public void OnHttpData(String data) {
-                                handleMessage(data);
+                            public void onClick(DialogInterface dialog, int which) {
+                                RequestUtils.getRequest(AppConst.authUrl("person/merchant/resetSecret"), new IHttpResponse() {
+
+                                    @Override
+                                    public void OnHttpData(String data) {
+                                        handleMessage(data);
+                                    }
+
+                                    @Override
+                                    public void OnHttpDataError(IOException e) {
+
+                                    }
+                                });
+
                             }
-
-                            @Override
-                            public void OnHttpDataError(IOException e) {
-
-                            }
-                        });
-
-                    }
-                }).show();
+                        }).show();
                 dialog.setCancelable(true);
             }
         });
@@ -86,44 +86,44 @@ public class MerchantActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 final String uniteId = txt_uniteId.getText().toString();
-                if(merchantId.equals(uniteId)){
-                    ToastUtil.show(MerchantActivity.this,"目标商户ID是自己");
+                if (merchantId.equals(uniteId)) {
+                    ToastUtil.show(MerchantActivity.this, "目标商户ID是自己");
                     return;
                 }
-                AlertDialog  dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("关联之后.本商户将注销,不再独立收款,确定要关联吗?").setIcon(R.drawable.icon).
+                AlertDialog dialog = new AlertDialog.Builder(MerchantActivity.this).setTitle("关联之后.本商户将注销,不再独立收款,确定要关联吗?").setIcon(R.drawable.icon).
                         setPositiveButton(R.string.action_confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        RequestUtils.getRequest(AppConst.authUrl("person/merchant/bind")+"&unite="+uniteId,new IHttpResponse(){
-
                             @Override
-                            public void OnHttpData(String data) {
-                                handleMessage(data);
+                            public void onClick(DialogInterface dialog, int which) {
+                                RequestUtils.getRequest(AppConst.authUrl("person/merchant/bind") + "&unite=" + uniteId, new IHttpResponse() {
+
+                                    @Override
+                                    public void OnHttpData(String data) {
+                                        handleMessage(data);
+                                    }
+
+                                    @Override
+                                    public void OnHttpDataError(IOException e) {
+
+                                    }
+                                });
+
                             }
-
-                            @Override
-                            public void OnHttpDataError(IOException e) {
-
-                            }
-                        });
-
-                    }
-                }).show();
+                        }).show();
                 dialog.setCancelable(true);
             }
         });
 
-        btn_admin.setOnClickListener(new View.OnClickListener(){
+        btn_admin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.setData(Uri.parse(AppConst.HostUrl+"app/start/index.html#/token="+AppConst.Token+"/appid="+AppConst.AppId));//Url 就是你要打开的网址
+                intent.setData(Uri.parse(AppConst.HostUrl + "app/start/index.html#/token=" + AppConst.Token + "/appid=" + AppConst.AppId));//Url 就是你要打开的网址
                 intent.setAction(Intent.ACTION_VIEW);
                 startActivity(intent); //启动浏览器
             }
         });
 
-        RequestUtils.getRequest(AppConst.authUrl("person/merchant/getMerchant"),new IHttpResponse(){
+        RequestUtils.getRequest(AppConst.authUrl("person/merchant/getMerchant"), new IHttpResponse() {
 
             @Override
             public void OnHttpData(String data) {
@@ -137,59 +137,63 @@ public class MerchantActivity extends AppCompatActivity{
         });
     }
 
-    private void copySecret(){
+    private void copySecret() {
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData mClipData = ClipData.newPlainText("Label", "商户ID: "+merchantId+" ,密钥: "+Secret);
+        ClipData mClipData = ClipData.newPlainText("Label", "商户ID: " + merchantId + " ,密钥: " + Secret);
         cm.setPrimaryClip(mClipData);
         Toast.makeText(this, "复制成功", Toast.LENGTH_LONG).show();
     }
 
-    public void regist(){
+    public void regist() {
 
     }
 
     private void handleMessage(String message) {
-            if (message == null||message.isEmpty()) {
-                return;
-            }
-            Log.i("ZYKJ", message);
+        if (message == null || message.isEmpty()) {
+            return;
+        }
+        Log.i("ZYKJ", message);
 
-            JSONObject json;
-            try {
-                json = new JSONObject(message);
-                int code = json.getInt("code");
-                if (code == 0) {
-                    json = json.getJSONObject("data");
-                    merchantId = json.getString("merchantid");
-                    Secret = json.getString("secret");
+        JSONObject json;
+        try {
+            json = new JSONObject(message);
+            int code = json.getInt("code");
+            if (code == 0) {
+                json = json.getJSONObject("data");
+                merchantId = json.getString("merchantid");
+                Secret = json.getString("secret");
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        txt_Merchant.setText(merchantId);
+                        txt_Secret.setText(Secret);
+                    }
+                };
+                uiHandler.post(runnable);
+
+            } else {
+                final String emsg = json.getString("msg");
+                Log.w("ZYKJ", emsg);
+                ToastUtil.show(this, emsg);
+                if (code == 99) {
                     Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
-                            txt_Merchant.setText(merchantId);
-                            txt_Secret.setText(Secret);
+                            btn_copy.setEnabled(false);
+                            btn_reset.setEnabled(false);
+                            btn_unite.setEnabled(false);
+                            new AlertDialog.Builder(MerchantActivity.this)
+                                    .setTitle("注意")
+                                    .setIcon(R.drawable.icon)
+                                    .setMessage(emsg).show();
                         }
                     };
                     uiHandler.post(runnable);
-
-                } else {
-                    String emsg = json.getString("msg");
-                    Log.w("ZYKJ", emsg);
-                    ToastUtil.show(this, emsg);
-                    if(code == 99) {
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                btn_copy.setEnabled(false);
-                                btn_reset.setEnabled(false);
-                                btn_unite.setEnabled(false);
-                            }
-                        };
-                        uiHandler.post(runnable);
-                    }
                 }
-
-            } catch (JSONException e) {
-                Log.w("ZYKJ", e);
             }
+
+        } catch (JSONException e) {
+            Log.w("ZYKJ", e);
+        }
     }
 }
