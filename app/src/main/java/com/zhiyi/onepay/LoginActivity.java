@@ -116,7 +116,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(true);
 
             String sign= AppUtil.toMD5("zhiyikeji"+appUnid+BuildConst.Secret);
-            RequestUtils.getRequest(AppConst.HostUrl + "person/api/getAppId/unid/" + appUnid + "/sign/" + sign, new IHttpResponse() {
+            RequestUtils.getRequest(AppConst.HostUrl + "person/api/getAppIdV2/unid/" + appUnid + "/sign/" + sign, new IHttpResponse() {
                 @Override
                 public void OnHttpData(String rs) {
                     if(rs==null || rs.isEmpty()){

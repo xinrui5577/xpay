@@ -179,13 +179,22 @@ public class NotificationMonitorService extends NotificationListenerService impl
     public void run() {
         while (true) {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Log.e("ZYKJ", "service thread", e);
             }
-            //发送在线通知,保持让系统时时刻刻直到app在线
+            long now = System.currentTimeMillis();
+            //10秒内有交互,取消
+            if(now - lastNetTime<10){
+                return;
+            }
+            //发送在线通知,保持让系统时时刻刻直到app在线,5秒发送一次
+            if(now-lastSendTime<5000){
+                return;
+            }
             postState();
-            if (System.currentTimeMillis() - lastNetTime > 20000) {
+            //20秒,没消息了.提示网络异常
+            if (now - lastNetTime > 20000) {
                 playMedia(payNetWorkError);
             }
         }
@@ -249,10 +258,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     }
 
+    private long lastSendTime;
+
     /**
      * 发送错误信息到服务器
      */
     public void postState() {
+        lastSendTime = System.currentTimeMillis();
         RequestUtils.getRequest(AppConst.authUrl("person/state/online") + "&v=" + AppConst.version + "&b=" + AppConst.Battery, new IHttpResponse() {
             @Override
             public void OnHttpData(String data) {
