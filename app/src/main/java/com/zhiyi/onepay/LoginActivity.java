@@ -129,7 +129,7 @@ public class LoginActivity extends AppCompatActivity {
                             JSONObject data = json.getJSONObject("data");
                             String appId = data.getString("appid");
                             if(data.has("token")){
-                                AppConst.Token = data.getString("appid");
+                                AppConst.Token = data.getString("token");
                             }
                             AppConst.AppId = Integer.parseInt(appId);
                             Runnable runnable = new Runnable() {

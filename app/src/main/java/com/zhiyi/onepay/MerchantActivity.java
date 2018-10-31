@@ -86,6 +86,10 @@ public class MerchantActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final String uniteId = txt_uniteId.getText().toString();
+                if(merchantId == null){
+                    ToastUtil.show(MerchantActivity.this, "请等待商户ID获取");
+                    return;
+                }
                 if (merchantId.equals(uniteId)) {
                     ToastUtil.show(MerchantActivity.this, "目标商户ID是自己");
                     return;
