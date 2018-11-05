@@ -28,6 +28,8 @@ public class AppConst {
     public static String Token="";
     public static String Secret="";
 
+    public static int DetaTime = 0;//手机和服务器的时间差
+
     public static final String TAG_LOG = "ZYKJ";
 
     public static final String IntentAction = "com.zhiyikeji.Notification";
