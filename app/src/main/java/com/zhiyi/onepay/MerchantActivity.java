@@ -1,17 +1,15 @@
 package com.zhiyi.onepay;
 
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,13 +41,13 @@ public class MerchantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         uiHandler = new Handler();
         setContentView(R.layout.activity_merchant);
-        btn_copy = (Button) findViewById(R.id.button_copy);
-        btn_reset = (Button) findViewById(R.id.button_reset);
-        btn_unite = (Button) findViewById(R.id.button_unite);
-        btn_admin = (Button) findViewById(R.id.button_admin);
-        txt_Merchant = (TextView) findViewById(R.id.merchant_id);
-        txt_Secret = (TextView) findViewById(R.id.merchant_secret);
-        txt_uniteId = (TextView) findViewById(R.id.text_unite);
+        btn_copy = findViewById(R.id.button_copy);
+        btn_reset = findViewById(R.id.button_reset);
+        btn_unite = findViewById(R.id.button_unite);
+        btn_admin = findViewById(R.id.button_admin);
+        txt_Merchant = findViewById(R.id.merchant_id);
+        txt_Secret = findViewById(R.id.merchant_secret);
+        txt_uniteId = findViewById(R.id.text_unite);
         btn_copy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,15 +146,12 @@ public class MerchantActivity extends AppCompatActivity {
         Toast.makeText(this, "复制成功", Toast.LENGTH_LONG).show();
     }
 
-    public void regist() {
-
-    }
 
     private void handleMessage(String message) {
         if (message == null || message.isEmpty()) {
             return;
         }
-        Log.i("ZYKJ", message);
+        Log.i(AppConst.TAG_LOG, message);
 
         JSONObject json;
         try {
@@ -177,7 +172,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             } else {
                 final String emsg = json.getString("msg");
-                Log.w("ZYKJ", emsg);
+                Log.w(AppConst.TAG_LOG, emsg);
                 ToastUtil.show(this, emsg);
                 if (code == 99) {
                     Runnable runnable = new Runnable() {
@@ -197,7 +192,7 @@ public class MerchantActivity extends AppCompatActivity {
             }
 
         } catch (JSONException e) {
-            Log.w("ZYKJ", e);
+            Log.w(AppConst.TAG_LOG, e);
         }
     }
 }
