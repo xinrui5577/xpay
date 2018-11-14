@@ -34,17 +34,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:textOn="@string/textOn"
+                android:text="@string/action_to_privileges"
                 android:textOff="@string/textOff"
-                android:text="@string/action_to_privileges" />
+                android:textOn="@string/textOn" />
+
             <Switch
                 android:id="@+id/service"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:textOn="@string/textOn"
+                android:text="@string/action_to_open"
                 android:textOff="@string/textOff"
-                android:text="@string/action_to_open" />
+                android:textOn="@string/textOn" />
+
+            <Switch
+                android:id="@+id/mute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/action_to_mute"
+                android:textOff="@string/textOff"
+                android:textOn="@string/textOn" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -61,6 +71,7 @@
                     android:background="@android:color/holo_green_dark"
                     android:text="@string/action_qrcode"
                     android:textStyle="bold" />
+
                 <Button
                     android:id="@+id/btn_merchant"
                     style="@style/Widget.AppCompat.Button.Small"
@@ -72,35 +83,44 @@
                     android:text="@string/action_merchant"
                     android:textStyle="bold" />
             </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_order"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:background="@color/colorPrimaryDark"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/action_order"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_log"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:background="@android:color/holo_blue_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/action_to_log"
-                android:textStyle="bold" />
+                <Button
+                    android:id="@+id/btn_order"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_weight="1"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="@string/action_order"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_log"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/holo_blue_dark"
+                    android:text="@string/action_to_log"
+                    android:textStyle="bold" />
 
 
-        </LinearLayout>
+            </LinearLayout>
+
+            <!--<Button-->
+                <!--android:id="@+id/btn_exit"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="一键退出"-->
+                <!--android:textStyle="bold"-->
+                <!--/>-->
 
             <TextView
                 android:layout_width="match_parent"
@@ -127,6 +147,18 @@
                 android:textAlignment="textEnd"
                 android:textColor="?attr/colorPrimaryDark"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView_version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:lineSpacingExtra="4sp"
+                android:text="版本："
+                android:textAlignment="textEnd"
+                android:textColor="?attr/colorPrimaryDark"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
 

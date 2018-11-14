@@ -36,6 +36,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i("ZYKJ", "mainactivity");
         handler = new Handler(getMainLooper()){
             @Override
             public void handleMessage(Message msg) {
@@ -44,7 +45,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
                 }
             }
         };
-        new Thread(this,"MainService").start();
+         new Thread(this,"MainService").start();
         //保持黑屏状态执行
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MainService.class.getName());
@@ -56,6 +57,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
         //声音播放也不成功
         payComp = MediaPlayer.create(this, R.raw.paycomp);
         payComp.setOnCompletionListener(this);
+        //
         Log.i("ZYKJ","MainService Start");
         NotificationManager mNM =(NotificationManager)getSystemService(Service.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -79,6 +81,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+        Log.i("yyk","notification qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
         return START_STICKY;
     }
 
@@ -99,6 +102,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
 
     @Override
     public void run() {
+//        while(!AppConst.ManualExit){
         while(true){
             try {
                 Thread.sleep(30000);
@@ -122,7 +126,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
      * 但是这个播放声音我的手机老是出毛病.重启后就好了..
      */
     public void payCompSounds(){
-        payComp.start();
+        if (AppConst.PlaySounds) {payComp.start();}
     }
 
 
@@ -131,6 +135,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
      */
     @Override
     public void onDestroy() {
+//        if(AppConst.ManualExit) return;
         if(payComp!=null){
             payComp.release();
             payComp= null;

@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/xpay.iml" filepath="$PROJECT_DIR$/xpay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pxpay.iml" filepath="$PROJECT_DIR$/pxpay.iml" />
     </modules>
   </component>
 </project>
