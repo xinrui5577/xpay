@@ -114,13 +114,13 @@
 
             </LinearLayout>
 
-            <!--<Button-->
-                <!--android:id="@+id/btn_exit"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="一键退出"-->
-                <!--android:textStyle="bold"-->
-                <!--/>-->
+            <Button
+                android:id="@+id/btn_exit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="一键退出"
+                android:textStyle="bold"
+                />
 
             <TextView
                 android:layout_width="match_parent"

@@ -81,7 +81,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.i("yyk","notification qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+        if(AppConst.ManualExit) return START_NOT_STICKY;
         return START_STICKY;
     }
 
@@ -102,8 +102,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
 
     @Override
     public void run() {
-//        while(!AppConst.ManualExit){
-        while(true){
+       while(true){
             try {
                 Thread.sleep(30000);
             } catch (InterruptedException e) {
@@ -135,7 +134,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
      */
     @Override
     public void onDestroy() {
-//        if(AppConst.ManualExit) return;
+        if(AppConst.ManualExit) return;
         if(payComp!=null){
             payComp.release();
             payComp= null;
@@ -146,7 +145,7 @@ public class MainService extends Service implements Runnable, MediaPlayer.OnComp
         }
         Intent localIntent = new Intent();
         localIntent.setClass(this, MainService.class);
-        startService(localIntent);
+       startService(localIntent);
     }
 }
 

@@ -203,17 +203,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // 手动一键退出
-//        Button but_exit = (Button)findViewById(R.id.btn_exit);
-//        but_exit.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view) {
-//                AppConst.ManualExit = true;
-//                dbm.setConfig(AppConst.KeyManualExit,""+AppConst.ManualExit);
-//                android.os.Process.killProcess(android.os.Process.myPid());
-//
-////                System.exit(0);
-//            }
-//        });
+        Button but_exit = (Button)findViewById(R.id.btn_exit);
+        but_exit.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                AppConst.ManualExit = true;
+                dbm.setConfig(AppConst.KeyManualExit,""+AppConst.ManualExit);
+                android.os.Process.killProcess(android.os.Process.myPid());
+//                System.exit(0);
+            }
+        });
 
         Intent intent = new Intent(this, MainService.class);
         intent.putExtra("from", "MainActive");
@@ -222,8 +221,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void test(){
-        service.stopSelf();
-        stopService(new Intent(this, NotificationMonitorService.class));
+        Intent intent = new Intent(this, NotificationMonitorService.class);
+        stopService(intent);
     }
 
     @Override
@@ -243,28 +242,27 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "you click add_item", Toast.LENGTH_SHORT).show();
 
                 Log.i("yyk","url === "+AppConst.authUrl("person/Merchant/addBindCode"));
-                RequestUtils.getRequest(AppConst.authUrl("person/Merchant/addBindCode"), new IHttpResponse() {
-
-                    @Override
-                    public void OnHttpData(String data) {
-
-                        try{
-                            JSONObject json = new JSONObject(data);
-                            Log.i("yyk","msg === "+json.getString("msg"));
-                        }
-                        catch (JSONException je){
-                                Log.i("yyk","msg === "+je.getMessage());
-                        }
-                        Message msg = new Message();
-                        msg.what = 1;
-                        msg.obj = "time";
-                    }
-
-                    @Override
-                    public void OnHttpDataError(IOException e) {
-
-                    }
-                });
+//                RequestUtils.post(AppConst.authUrl("person/Merchant/addBindCode"),);
+//                RequestUtils.getRequest(AppConst.authUrl("person/Merchant/addBindCode"), new IHttpResponse() {
+//                    @Override
+//                    public void OnHttpData(String data) {
+//                        try{
+//                            JSONObject json = new JSONObject(data);
+//                            Log.i("yyk","msg === "+json.getString("msg"));
+//                        }
+//                        catch (JSONException je){
+//                            Log.i("yyk","msg === "+je.getMessage());
+//                        }
+//                        Message msg = new Message();
+//                        msg.what = 1;
+//                        msg.obj = "time";
+//                    }
+//
+//                    @Override
+//                    public void OnHttpDataError(IOException e) {
+//
+//                    }
+//                });
                 break;
         }
         return true;
@@ -332,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        test();
     }
 
 

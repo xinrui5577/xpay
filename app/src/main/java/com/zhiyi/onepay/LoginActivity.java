@@ -121,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
             dbManager.setConfig(AppConst.KeyMute,"true");
         }
         // 手动关机
-//        dbManager.setConfig(AppConst.KeyManualExit,"false");
+        dbManager.setConfig(AppConst.KeyManualExit,"false");
     }
 
     private void createAppId() {

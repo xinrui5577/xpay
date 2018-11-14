@@ -86,13 +86,13 @@ public class NotificationMonitorService extends NotificationListenerService impl
                 AppConst.PlaySounds = Boolean.parseBoolean(mute);
             }
             // 推送前判断下AppConst.ManualExit
-//            String manualexit = dbManager.getConfig(AppConst.KeyManualExit);
-//            if(!TextUtils.isEmpty(manualexit)){
-//                AppConst.ManualExit = Boolean.parseBoolean(manualexit);
-//            }
-//            Log.i("yyk","手动退出值 为 "+AppConst.ManualExit );
+            String manualexit = dbManager.getConfig(AppConst.KeyManualExit);
+            if(!TextUtils.isEmpty(manualexit)){
+                AppConst.ManualExit = Boolean.parseBoolean(manualexit);
+            }
+            Log.i("yyk","手动退出值 为 "+AppConst.ManualExit );
         }
-        new Thread(this).start();
+//        new Thread(this).start();
         Log.i("ZYKJ", "Notification Monitor Service start");
         NotificationManager mNM = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mNM != null) {
@@ -129,7 +129,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     public void onDestroy() {
         // 判断手动退出 不重启服务
-//        if(AppConst.ManualExit) return;
+        if(AppConst.ManualExit) return;
 
         if (wakeLock != null) {
             wakeLock.release();
@@ -194,9 +194,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     @Override
     public void run() {
-//        Log.i("yyk","notification AppConst.ManualExit == "+AppConst.ManualExit);
-//        while(!AppConst.ManualExit){
-        while (true) {
+         while (true) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -231,8 +229,8 @@ public class NotificationMonitorService extends NotificationListenerService impl
     }
 
     public int onStartCommand(Intent paramIntent, int paramInt1, int paramInt2) {
-        Log.i("yyk","notification qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-        return START_STICKY;
+        Log.i("yyk","notification qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq === "+AppConst.ManualExit);
+        return START_NOT_STICKY;
     }
 
     /**

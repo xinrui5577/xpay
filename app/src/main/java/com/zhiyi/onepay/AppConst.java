@@ -14,7 +14,7 @@ public class AppConst {
     /** 音量*/
     public static final String KeyMute = "mute";
     /** 手动退出*/
-//    public static final String KeyManualExit= "ManualExit";
+   public static final String KeyManualExit= "ManualExit";
     /**服务器地址*/
     public static final String HostUrl = "https://pxpay.ukafu.com/";
 
@@ -26,7 +26,7 @@ public class AppConst {
     public static int Battery=0;
 
     /** 是否手动退出*/
-//    public static boolean ManualExit = false;
+    public static boolean ManualExit = false;
 
     public static boolean PlaySounds = true;
 
