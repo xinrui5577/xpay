@@ -5,6 +5,8 @@
 
 package com.zhiyi.onepay;
 
+import android.Manifest;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,10 +22,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -31,6 +39,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhiyi.onepay.util.DBManager;
+import com.zhiyi.onepay.util.RequestUtils;
+import com.zhiyi.onepay.util.ToastUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TRUE = "true";
@@ -39,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Switch swt_fuwu;
     private Switch swt_service;
+    private Switch swt_mute;
     private Button btn_qrcode;
     private Button btn_merchant;
     private Button btn_log;
@@ -82,27 +98,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("ZYKJ", "mainactivity");
         setContentView(R.layout.activity_main);
 
         swt_fuwu = (Switch)findViewById(R.id.p1);
         swt_service = (Switch)findViewById(R.id.service);
+        swt_mute = (Switch)findViewById(R.id.mute);
 
         btn_qrcode = (Button) findViewById(R.id.btn_qrcode);
         btn_merchant = (Button)findViewById(R.id.btn_merchant);
         btn_log = (Button)findViewById(R.id.btn_log);
 
         swt_service.setChecked(false);
-        handler = new Handler();
+        handler = new Handler(){
+            public void handleMessage(Message msg) {
+
+            }
+        };
 
         textView = (TextView)findViewById(R.id.textView_Help);
         dbm = new DBManager(this);
-
+        //
+        swt_mute.setChecked(!AppConst.PlaySounds);
+        //
+        TextView textv = (TextView)findViewById(R.id.textView_version);
         try {
             AppConst.version = getPackageManager().getPackageInfo(getPackageName(),0).versionCode;
+            // 显示版本号
+            textv.setText(textv.getText()+""+AppConst.version);
+            //
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
 
         IntentFilter filter = new IntentFilter(AppConst.IntentAction);
         registerReceiver(receiver,filter);
@@ -168,10 +195,35 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        // 静音
+        swt_mute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                changeMutestate(isChecked);
+            }
+        });
+        // 手动一键退出
+//        Button but_exit = (Button)findViewById(R.id.btn_exit);
+//        but_exit.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view) {
+//                AppConst.ManualExit = true;
+//                dbm.setConfig(AppConst.KeyManualExit,""+AppConst.ManualExit);
+//                android.os.Process.killProcess(android.os.Process.myPid());
+//
+////                System.exit(0);
+//            }
+//        });
+
         Intent intent = new Intent(this, MainService.class);
         intent.putExtra("from", "MainActive");
         bindService(intent, conn, BIND_AUTO_CREATE);
         checkStatus();
+    }
+
+    void test(){
+        service.stopSelf();
+        stopService(new Intent(this, NotificationMonitorService.class));
     }
 
     @Override
@@ -179,8 +231,47 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         checkStatus();
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-    private boolean enabedPrivileges;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_bindcode:
+                Toast.makeText(MainActivity.this, "you click add_item", Toast.LENGTH_SHORT).show();
+
+                Log.i("yyk","url === "+AppConst.authUrl("person/Merchant/addBindCode"));
+                RequestUtils.getRequest(AppConst.authUrl("person/Merchant/addBindCode"), new IHttpResponse() {
+
+                    @Override
+                    public void OnHttpData(String data) {
+
+                        try{
+                            JSONObject json = new JSONObject(data);
+                            Log.i("yyk","msg === "+json.getString("msg"));
+                        }
+                        catch (JSONException je){
+                                Log.i("yyk","msg === "+je.getMessage());
+                        }
+                        Message msg = new Message();
+                        msg.what = 1;
+                        msg.obj = "time";
+                    }
+
+                    @Override
+                    public void OnHttpDataError(IOException e) {
+
+                    }
+                });
+                break;
+        }
+        return true;
+    }
+
+
+        private boolean enabedPrivileges;
     private void checkStatus(){
         //权限开启.才能启动服务
         boolean enabled = isEnabled();
@@ -206,6 +297,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void changeMutestate(boolean ischecked){
+        AppConst.PlaySounds = !ischecked;
+        dbm.setConfig(AppConst.KeyMute,""+AppConst.PlaySounds);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

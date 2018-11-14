@@ -16,6 +16,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.PowerManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -85,6 +86,17 @@ public class NotificationMonitorService extends NotificationListenerService impl
                     AppConst.Secret = secret;
                 }
             }
+            // 推送前判断下playSounds
+            String mute = dbManager.getConfig(AppConst.KeyMute);
+            if(!TextUtils.isEmpty(mute)){
+                AppConst.PlaySounds = Boolean.parseBoolean(mute);
+            }
+            // 推送前判断下AppConst.ManualExit
+//            String manualexit = dbManager.getConfig(AppConst.KeyManualExit);
+//            if(!TextUtils.isEmpty(manualexit)){
+//                AppConst.ManualExit = Boolean.parseBoolean(manualexit);
+//            }
+//            Log.i("yyk","手动退出值 为 "+AppConst.ManualExit );
         }
         new Thread(this).start();
         Log.i(AppConst.TAG_LOG, "Notification Monitor Service start");
@@ -122,6 +134,9 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
 
     public void onDestroy() {
+        // 判断手动退出 不重启服务
+//        if(AppConst.ManualExit) return;
+
         if (wakeLock != null) {
             wakeLock.release();
             wakeLock = null;
@@ -142,7 +157,8 @@ public class NotificationMonitorService extends NotificationListenerService impl
             Uri uri = new Uri.Builder().scheme("app").path("log").query("msg=测试成功").build();
             intent.setData(uri);
             sendBroadcast(intent);
-            payRecv.start();
+            //payRecv.start();
+            playMedia(payRecv);
             return;
         }
         String title = bundle.getString("android.title");
@@ -192,6 +208,8 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
     @Override
     public void run() {
+//        Log.i("yyk","notification AppConst.ManualExit == "+AppConst.ManualExit);
+//        while(!AppConst.ManualExit){
         while (true) {
             try {
                 Thread.sleep(5000);
@@ -238,6 +256,7 @@ public class NotificationMonitorService extends NotificationListenerService impl
     }
 
     public int onStartCommand(Intent paramIntent, int paramInt1, int paramInt2) {
+        Log.i("yyk","notification qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
         return START_STICKY;
     }
 

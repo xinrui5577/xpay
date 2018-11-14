@@ -11,7 +11,10 @@ public class AppConst {
     public static final String KeyBoolLog = "b_set_log";
 //    public static final String KeyBoolWx = "b_set_wx";
 //    public static final String KeyBoolZfb = "b_set_zfb";
-
+    /** 音量*/
+    public static final String KeyMute = "mute";
+    /** 手动退出*/
+//    public static final String KeyManualExit= "ManualExit";
     /**服务器地址*/
     public static final String HostUrl = "https://pxpay.ukafu.com/";
 //    public static final String HostUrl = "http://test.ukafu.com/";
@@ -22,6 +25,9 @@ public class AppConst {
     public static int version;
 
     public static int Battery=0;
+
+    /** 是否手动退出*/
+//    public static boolean ManualExit = false;
 
     public static boolean PlaySounds = true;
 

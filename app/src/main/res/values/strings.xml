@@ -2,6 +2,7 @@
     <string name="app_name">PXPAY</string>
     <string name="app_name2">个人支付专家</string>
     <string name="action_help">帮助</string>
+    <string name="action_bindcode">获取绑定码</string>>
     <!--<string name="title_activity_login">登录</string>-->
 
     <!-- Strings related to login -->
@@ -13,6 +14,7 @@
     <string name="action_to_log">日志记录</string>
     <string name="action_to_privileges">服务权限</string>
     <string name="action_open_setting">打开权限设置</string>
+    <string name="action_to_mute">静音</string>
     <string name="action_order">订单管理</string>
     <string name="action_qrcode">二维码管理</string>
     <string name="action_merchant">商户密钥</string>

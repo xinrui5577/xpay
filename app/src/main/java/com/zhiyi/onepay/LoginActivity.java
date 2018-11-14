@@ -107,8 +107,22 @@ public class LoginActivity extends AppCompatActivity {
         }else{
             createAppId();
         }
+        //
+        getAppConfig();
+        //
     }
 
+    private void getAppConfig(){
+        // 静音
+        String mute = readData(AppConst.KeyMute);
+        if(!TextUtils.isEmpty(mute)){
+            AppConst.PlaySounds = Boolean.parseBoolean(mute);
+        }else{
+            dbManager.setConfig(AppConst.KeyMute,"true");
+        }
+        // 手动关机
+//        dbManager.setConfig(AppConst.KeyManualExit,"false");
+    }
 
     private void createAppId() {
         String appUnid = AppUtil.getUniqueId(this);
@@ -221,6 +235,8 @@ public class LoginActivity extends AppCompatActivity {
                             dbManager.setConfig(AppConst.KeySecret,AppConst.Secret);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
+                            //
+                            finish();
                         }else{
                             ToastUtil.show(LoginActivity.this, json.getString("msg"));
                         }
