@@ -16,8 +16,8 @@ public class AppConst {
     /** 手动退出*/
 //    public static final String KeyManualExit= "ManualExit";
     /**服务器地址*/
-    public static final String HostUrl = "https://pxpay.ukafu.com/";
-//    public static final String HostUrl = "http://test.ukafu.com/";
+//    public static final String HostUrl = "https://pxpay.ukafu.com/";
+    public static final String HostUrl = "http://test.ukafu.com/";
 
     /**传输数据为URL的KEY*/
     public static final String ACTION_URL = "a_url";
