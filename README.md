@@ -36,4 +36,4 @@
  <a href="https://gitee.com/sipengcode/quick-pay" targe="_blank"> 下单演示,接入文档, PHP Demo </a>
 	支付页面,手机,PC自适应
 # QQ交流群
-  153497287
+  728727933(来吧) 153497287(已满) 
