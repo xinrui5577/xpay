@@ -131,9 +131,6 @@ public class NotificationMonitorService extends NotificationListenerService impl
 
 
     public void onDestroy() {
-        // 判断手动退出 不重启服务
-//        if(AppConst.ManualExit) return;
-
         if (wakeLock != null) {
             wakeLock.release();
             wakeLock = null;

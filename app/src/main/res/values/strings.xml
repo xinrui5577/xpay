@@ -2,7 +2,8 @@
     <string name="app_name">PXPAY</string>
     <string name="app_name2">个人支付专家</string>
     <string name="action_help">帮助</string>
-    <string name="action_bindcode">获取绑定码</string>>
+    <string name="action_bindcode">获取绑定码</string>
+    <string name="action_exitapp">退出</string>
     <string name="action_apiset">自定义接口</string>>
     <!--<string name="title_activity_login">登录</string>-->
 

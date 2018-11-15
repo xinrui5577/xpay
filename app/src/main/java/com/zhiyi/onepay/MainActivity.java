@@ -223,14 +223,6 @@ public class MainActivity extends AppCompatActivity {
                 changeMutestate(isChecked);
             }
         });
-        // 手动一键退出
-        Button but_exit = (Button)findViewById(R.id.btn_exit);
-        but_exit.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                exit();
-            }
-        });
 
         Intent intent = new Intent(this, MainService.class);
         intent.putExtra("from", "MainActive");
@@ -278,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+            case R.id.action_exitapp:
+                exit();
                 break;
         }
         return true;
