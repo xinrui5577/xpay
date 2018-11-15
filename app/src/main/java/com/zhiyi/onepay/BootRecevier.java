@@ -14,7 +14,6 @@ public class BootRecevier extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(AppConst.ManualExit) return;
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
         {
             Log.i("ZYKJ", "Notification posted ");

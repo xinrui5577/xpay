@@ -5,16 +5,14 @@
 
 package com.zhiyi.onepay;
 
-import android.Manifest;
-import android.app.NotificationManager;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,14 +20,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -40,7 +35,6 @@ import android.widget.Toast;
 
 import com.zhiyi.onepay.util.DBManager;
 import com.zhiyi.onepay.util.RequestUtils;
-import com.zhiyi.onepay.util.ToastUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,6 +89,33 @@ public class MainActivity extends AppCompatActivity {
     public MainActivity() {
     }
 
+    private void mHandMessage(Message msg){
+        if(msg.what == 1){
+            String code = msg.obj.toString();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("获取绑定码");
+            builder.setMessage("您得绑定码为: "+code+" ,请通过商户后台添加绑定,在绑定成功之前.请勿关闭");
+            builder.setIcon(R.drawable.icon);
+            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    RequestUtils.getRequest(AppConst.authUrl("person/Merchant/delBindCode"),new IHttpResponse() {
+
+                        @Override
+                        public void OnHttpData(String data) {
+
+                        }
+
+                        @Override
+                        public void OnHttpDataError(IOException e) {
+
+                        }
+                    });
+                }
+            }).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         swt_service.setChecked(false);
         handler = new Handler(){
             public void handleMessage(Message msg) {
-
+                mHandMessage(msg);
             }
         };
 
@@ -207,22 +228,17 @@ public class MainActivity extends AppCompatActivity {
         but_exit.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                AppConst.ManualExit = true;
-                dbm.setConfig(AppConst.KeyManualExit,""+AppConst.ManualExit);
-                android.os.Process.killProcess(android.os.Process.myPid());
-//                System.exit(0);
+                exit();
             }
         });
 
         Intent intent = new Intent(this, MainService.class);
         intent.putExtra("from", "MainActive");
         bindService(intent, conn, BIND_AUTO_CREATE);
+        // 手动关闭服务之后 需要重新绑定服务 所以在onCreate处调用
+        toggleNotificationListenerService();
+        //
         checkStatus();
-    }
-
-    void test(){
-        Intent intent = new Intent(this, NotificationMonitorService.class);
-        stopService(intent);
     }
 
     @Override
@@ -230,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         checkStatus();
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -239,35 +256,47 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_bindcode:
-                Toast.makeText(MainActivity.this, "you click add_item", Toast.LENGTH_SHORT).show();
+                RequestUtils.getRequest(AppConst.authUrl("person/Merchant/addBindCode"), new IHttpResponse() {
+                    @Override
+                    public void OnHttpData(String data) {
+                        try{
+                            JSONObject json = new JSONObject(data);
+                            String code = ""+json.getJSONObject("data").getInt("bind_code");
+                            Message msg = new Message();
+                            msg.what = 1;
+                            msg.obj = code;
+                            MainActivity.this.handler.sendMessage(msg);
+                        }
+                        catch (JSONException je){
+                                Log.i("yyk","msg === "+je.getMessage());
+                        }
 
-                Log.i("yyk","url === "+AppConst.authUrl("person/Merchant/addBindCode"));
-//                RequestUtils.post(AppConst.authUrl("person/Merchant/addBindCode"),);
-//                RequestUtils.getRequest(AppConst.authUrl("person/Merchant/addBindCode"), new IHttpResponse() {
-//                    @Override
-//                    public void OnHttpData(String data) {
-//                        try{
-//                            JSONObject json = new JSONObject(data);
-//                            Log.i("yyk","msg === "+json.getString("msg"));
-//                        }
-//                        catch (JSONException je){
-//                            Log.i("yyk","msg === "+je.getMessage());
-//                        }
-//                        Message msg = new Message();
-//                        msg.what = 1;
-//                        msg.obj = "time";
-//                    }
-//
-//                    @Override
-//                    public void OnHttpDataError(IOException e) {
-//
-//                    }
-//                });
+                    }
+
+                    @Override
+                    public void OnHttpDataError(IOException e) {
+
+                    }
+                });
                 break;
         }
         return true;
     }
-
+    /** 退出 */
+    private void exit(){
+        unbindService(conn);
+        disableNotificationService();
+    }
+    /** 退出調用
+     * 功能 Disable掉 NotificationService 直接退出App
+     * */
+    private void disableNotificationService(){
+        // 先disable 服务
+        PackageManager localPackageManager = getPackageManager();
+        localPackageManager.setComponentEnabledSetting(new ComponentName(this, NotificationMonitorService.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);// 最后一个参数 DONT_KILL_APP或者0。 0说明杀死包含该组件的app
+        //
+    }
 
         private boolean enabedPrivileges;
     private void checkStatus(){
@@ -287,8 +316,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "服务开启失败", Toast.LENGTH_LONG).show();
             return;
         }
-
-        toggleNotificationListenerService();
+        // 手动关闭服务之后 需要重新设置服务 所以在onCreate处调用
+        // toggleNotificationListenerService();
         swt_service.setChecked(true);
 
         //微信支付宝开启
@@ -330,7 +359,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        test();
+// <<<<<<< HEAD
+//=======
+        unregisterReceiver(receiver);
+//>>>>>>> a263d3685d8e3cba5be9e8eab26c564355918af9
     }
 
 

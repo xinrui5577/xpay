@@ -13,10 +13,9 @@ public class AppConst {
 //    public static final String KeyBoolZfb = "b_set_zfb";
     /** 音量*/
     public static final String KeyMute = "mute";
-    /** 手动退出*/
-   public static final String KeyManualExit= "ManualExit";
     /**服务器地址*/
-    public static final String HostUrl = "https://pxpay.ukafu.com/";
+//    public static final String HostUrl = "https://pxpay.ukafu.com/";
+    public static final String HostUrl = "http://test.ukafu.com/";
 
     /**传输数据为URL的KEY*/
     public static final String ACTION_URL = "a_url";
@@ -25,14 +24,13 @@ public class AppConst {
 
     public static int Battery=0;
 
-    /** 是否手动退出*/
-    public static boolean ManualExit = false;
-
     public static boolean PlaySounds = true;
 
     public static int AppId=0;
     public static String Token="";
     public static String Secret="";
+
+    public static int DetaTime = 0;//手机和服务器的时间差
 
     public static final String TAG_LOG = "ZYKJ";
 

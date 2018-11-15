@@ -1,8 +1,6 @@
 *.iml
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
 /build
 /captures
@@ -10,3 +8,4 @@
 app/release/
 .idea/
 removed lib/
+app/src/main/java/com/zhiyi/onepay/TestNotification.java

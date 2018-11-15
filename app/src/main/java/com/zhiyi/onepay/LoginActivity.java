@@ -91,8 +91,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        Bugly.init(getApplicationContext(), "ff0995764e", false);
+        //腾讯的版本升级,日志,自己打包就去掉这个行
+//        Bugly.init(getApplicationContext(), BuildConst.BuglyId, false);
 
         dbManager = new DBManager(this);
         String appid = readData(AppConst.KeyAppId);
@@ -120,8 +120,6 @@ public class LoginActivity extends AppCompatActivity {
         }else{
             dbManager.setConfig(AppConst.KeyMute,"true");
         }
-        // 手动关机
-        dbManager.setConfig(AppConst.KeyManualExit,"false");
     }
 
     private void createAppId() {
@@ -235,7 +233,7 @@ public class LoginActivity extends AppCompatActivity {
                             dbManager.setConfig(AppConst.KeySecret,AppConst.Secret);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
-                            //
+                            // 登录成功之后finish
                             finish();
                         }else{
                             ToastUtil.show(LoginActivity.this, json.getString("msg"));
